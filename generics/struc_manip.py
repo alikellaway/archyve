@@ -4,6 +4,7 @@ Module contains functions useful for interacting with and manipulating file syst
 
 import hashlib
 import os
+from sys import path as syspath
 
 
 def files_equal(file1, file2):
@@ -13,16 +14,15 @@ def files_equal(file1, file2):
     :param file2: The location of the other file in the comparison.
     :return: boolean True if the files have equal contents.
     """
+    return hash_from_path(file1) == hash_from_path(file2)
+
+
+def hash_from_path(filepath):
     hasher = hashlib.md5()
-    with open(file1, 'rb') as f1:
-        buf = f1.read()
+    with open(filepath, 'rb') as f:
+        buf = f.read()
         hasher.update(buf)
-        file1_hash = hasher.hexdigest()
-    with open(file2, 'rb') as f2:
-        buf = f2.read()
-        hasher.update(buf)
-        file2_hash = hasher.hexdigest()
-    return file1_hash == file2_hash
+        return hasher.hexdigest()
 
 
 def get_file_size(filepath):
@@ -93,5 +93,57 @@ def name_from_path(path):
         return None
 
 
+def get_duplicates(direc_path):
+    """
+    Returns the paths of files that have equal content to another file in the directory. The first instance is not in
+    the output.
+    :param direc_path: The directory in which to search for duplicates.
+    :return: A list of paths of files that are duplicates of another files.
+    """
+    paths = get_subpaths(direc_path)
+    hashes = set()
+    duplicates = []
+    for path in paths:
+        size = len(hashes)
+        hashes.add(hash_from_path(path))
+        if size < len(hashes):
+            duplicates.append(path)
+    return duplicates
+
+
+def remove(paths):
+    """
+    Removes the file at the given path, or multiple files from a list of paths.
+    :param paths: A list of file paths to be removed.
+    :return: failed A list of file paths that failed to be removed.
+    """
+    if isinstance(paths, str):
+        paths = [paths]
+    failed = []  # A list of paths that failed to be removed.
+    for p in paths:
+        try:
+            os.remove(p)
+        except FileExistsError:
+            failed.append(p)
+            continue
+    return failed
+
+
+def remove_duplicates(directory):
+    """
+    Removes duplicate files from the given directory based on content.
+    :param directory: The directory to check for duplicates.
+    :return: A list of duplicates that failed to be removed.
+    """
+    return remove(get_duplicates(directory))
+
+
+def create_test_directory(location=syspath[0], depth=3, filecount_max=10):
+    for d in range(0, depth):
+        os.mkdir(location)
+
+
+
 if __name__ == '__main__':
-    print(extension(""))
+    create_test_directory()
+
