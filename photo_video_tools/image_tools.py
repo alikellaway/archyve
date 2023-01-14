@@ -5,52 +5,8 @@ import PIL
 from PIL import Image, ExifTags
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
+import generics.struc_manip as sm
 from pprint import pprint
-
-
-
-
-def subfiles(directory: str) -> list[str]:
-    """
-    Returns a list of paths of the files in the given directory.
-    :param directory: The directory in which to search.
-    :return: The list of file paths in the given directory.
-    """
-    os.chdir(directory)
-    return [f'{os.getcwd()}\\{f.name}' for f in os.scandir() if f.is_file()]
-
-
-def subdirs(directory: str) -> list[str]:
-    """
-    Returns a list of paths of the sub-folders to the given directory.
-    :param directory: The string path of the folder from which to extract the paths of sub-folders from.
-    :return: A list of sub folder paths.
-    """
-    os.chdir(directory)
-    return [f'{os.getcwd()}\\{f.name}' for f in os.scandir() if f.is_dir()]
-
-
-def get_subpaths(directory: str) -> list[str]:
-    """
-    Use to get the paths of every sub file in every sub folder into one list.
-    :param directory: The directory to recursively unpack.
-    :return: A list of string paths of each sub file.
-    """
-    os.chdir(directory)
-    sd = subdirs(directory)
-    sf = subfiles(directory)
-    if not not sd:  # if list not empty.
-        for d in sd:
-            sf += get_subpaths(d)
-    return sf
-
-
-def extension(path):
-    return path.split(".")[1]
-
-
-def name_from_path(path):
-    return path.split("\\")[-1]
 
 
 def get_image_exif_from_path(image_path: str) -> dict[str: int]:
@@ -92,7 +48,7 @@ def get_datetime_name(path):
 
     if dt is None or dt == '':
         raise AttributeError
-    return f'{str(dt).replace(":", "-")} {name_from_path(path)}'
+    return f'{str(dt).replace(":", "-")} {sm.name_from_path(path)}'
 
 
 def copy_and_rename_file(file_path, new_name, destination_path):
