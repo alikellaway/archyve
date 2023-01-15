@@ -1,6 +1,7 @@
 import os
 import shutil
-import PIL
+
+from PIL import UnidentifiedImageError
 from PIL import Image, ExifTags
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
@@ -38,7 +39,7 @@ def get_datetime_name(path):
     """
     try:
         dt = get_image_exif_from_path(path).get('DateTime')
-    except PIL.UnidentifiedImageError:  # Might have been a film
+    except UnidentifiedImageError:  # Might have been a film
         try:
             dt = extractMetadata(createParser(path)).get('creation_date')
         except ValueError:  # Film had no creation_date attribute.
@@ -49,79 +50,6 @@ def get_datetime_name(path):
     return f'{str(dt).replace(":", "-")} {sm.name_from_path(path)}'
 
 
-def copy_and_rename_file(file_path, new_name, destination_path):
-    """
-    Takes a file, copies it to a new location, and renames the file.
-    :param file_path: The file to operate on.
-    :param new_name: The new file name.
-    :param destination_path: The destination of the file.
-    :return:
-    """
-    shutil.copy(file_path, destination_path)
-    original_name = file_path.split("\\")[-1]
-    try:
-        os.rename(f'{destination_path}\\{original_name}', f'{destination_path}\\{new_name}')
-    except FileExistsError as e:
-        os.remove(f'{destination_path}\\{original_name}')
-        raise e
-
-    # succeeded = False
-    # while not succeeded:
-    #     try:
-    #         os.rename(f'{destination_path}\\{original_name}', f'{destination_path}\\{new_name}')
-    #         succeeded = True
-    #     except FileExistsError:  # If file exists, check if they're the same image.
-    #         try:
-    #             name_and_extension = new_name.split(".")
-    #             new_name = name_and_extension[0] + "-dnt." + name_and_extension[1]
-    #             os.rename(f'{destination_path}\\{original_name}', f'{destination_path}\\{new_name}')  # dnt: duplicate name token
-    #             succeeded = True
-    #         except FileExistsError:
-    #             pass
 
 if __name__ == "__main__":
-
-    # proj_direc = os.getcwd()  # Need the project directory to create a file later.
-    # paths = get_subpaths("D:\\Pictures\\Unsortables")  # Unpack all the paths in the folder.
-    # failed_paths = []  # Create a space for paths that fail this process.
-    # rename_dict = {}  # Create a space for the path re-mappings.
-    #
-    # for path in paths:
-    #     try:  # Try to remap to begin with its date time.
-    #         rename_dict[path] = get_datetime_name(path)
-    #     except (AttributeError, PIL.UnidentifiedImageError):  # Fails as no DateTime attr or file type not accepted yet.
-    #         failed_paths.append(path)
-    #
-    # # # # # Copy and rename all the photos to their new names # # # #
-    # for p, rn in rename_dict.items():
-    #     try:
-    #         copy_and_rename_file(p, rn, "D:\\Pictures\\Sorteds")
-    #         print(f'Copied and renamed {p} to {rn}')
-    #     except FileExistsError:
-    #         failed_paths.append(p)
-    #         print(f'Failed {p}')
-    #
-    #
-    # # # # Write the failed paths into a file. # # # #
-    # os.chdir(proj_direc)
-    # with open("failed_paths.txt", "w") as f:
-    #     for p in failed_paths:
-    #         f.write(f'{p}\n')
-    # f.close()
-    with open("duplicates.txt", 'r') as f:
-        group_sizes = []
-        group_size = 0
-        for line in f:
-            line = str(line)
-            if line[0:5] == '-----':
-                group_sizes.append(group_size)
-                group_size = 0  # Skip the seperator lines
-                continue
-            group_size += 1
-            infos = line.split('\t')
-            print(infos)
-
-            # path = infos[1]
-            # print(path)
-
-    # copy_and_rename_file("direc\\file.py", "f2.py", "direc\\subdirec1")
+    print()

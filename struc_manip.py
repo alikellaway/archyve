@@ -6,7 +6,7 @@ import hashlib
 import os
 import random
 from sys import path as syspath
-
+import shutil
 
 def files_equal(file1, file2):
     """
@@ -176,6 +176,34 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
             create_test_directory(depth - 1, location=os.path.join(location, f'dir_{i}'))
 
 
+def cut(filepath, destination, newname=None):
+    os.chdir(syspath[0])
+    src = filepath
+    temp_folder_name = "cut_temp_folder"
+    if newname is not None:
+        os.mkdir(temp_folder_name)
+        temp_path = f'{os.getcwd()}\\{temp_folder_name}'
+        shutil.copy(filepath, temp_path)
+        newpath = f'{temp_path}\\{newname}'
+        os.rename(f'{temp_path}\\{name_from_path(filepath)}', newpath)
+        src = newpath
+
+    try:
+        shutil.copy(src, destination)
+        print(src)
+        os.remove(filepath)
+    except FileExistsError:
+        raise FileExistsError
+    except FileNotFoundError:
+        raise FileNotFoundError
+    finally:
+        if newname is not None:
+            # Delete the temp
+            os.remove(src)
+            os.rmdir(f'{syspath[0]}\\{temp_folder_name}')
+
+
 if __name__ == '__main__':
-    test_direc_path = "/test_direc"
-    create_test_directory(5, test_direc_path)
+    # test_direc_path = "/test_direc"
+    # create_test_directory(5, test_direc_path)
+    cut("cuttest.txt", "test_direc")
