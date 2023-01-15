@@ -139,15 +139,13 @@ def remove_duplicates(directory):
     return remove(get_duplicates(directory))
 
 
-def create_test_directory(depth, duplicate_percentage=20, root_path=syspath[0]):
+def create_test_directory(depth, root_path, duplicate_percentage=25):
     if depth == 0:
         return
     os.chdir(root_path)
     current_directory = os.getcwd()
     for i in range(random.randint(1, 3)):
         dir_name = "dir_" + str(i)
-        while os.path.exists(dir_name):
-            dir_name = "dir_" + str(random.randint(0, 1000))
         os.mkdir(dir_name)
         os.chdir(dir_name)
 
@@ -165,10 +163,20 @@ def create_test_directory(depth, duplicate_percentage=20, root_path=syspath[0]):
             with open(file_name, 'w') as f:
                 f.write("This is a unique randomly generated text file.")
 
-        create_test_directory(depth - 1, duplicate_percentage, current_directory)
+        create_test_directory(depth - 1, current_directory, duplicate_percentage=duplicate_percentage)
         os.chdir(current_directory)
+
+def create_random_tree(depth, current_path):
+    if depth == 0:
+        return
+    os.chdir(current_path)
+    num_direc = random.randint(1,3)
+    for i in range(0, num_direc + 1):
+        dir_name = "dir_" + str(i)
+        os.mkdir(dir_name)
+    create_random_tree(depth - 1, os.path.join(current_path, f'dir_{random.randint(0,num_direc)}'))
 
 
 if __name__ == '__main__':
-    create_test_directory(5, root_path="C:\\Users\\alike\\git\\media_tools\\test_direc")
-
+    # create_test_directory(5, "C:\\Users\\alike\\git\\media_tools\\test_direc")
+    create_random_tree(5, "C:\\Users\\alike\\git\\media_tools\\test_direc")
