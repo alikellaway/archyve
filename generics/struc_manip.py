@@ -139,7 +139,7 @@ def remove_duplicates(directory):
     return remove(get_duplicates(directory))
 
 
-def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, max_directs=3, max_files=5):
+def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, max_directs=5, max_files=100):
     """
     Creates a random directory tree populated with text filese. Some of which are duplicates.
     :param depth: The depth of the tree to create.
@@ -171,14 +171,11 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
         with open(file_name, 'w') as f:
             f.write(f'This is a randomly generated unique file. Path hash: {hash(location + file_name)}')
 
-    create_test_directory(depth - 1, location=os.path.join(location, f'dir_{random.randint(0, num_direc)}'))
+    for i in range(num_direc):
+        if random.randint(0,1) == 1:
+            create_test_directory(depth - 1, location=os.path.join(location, f'dir_{i}'))
 
 
 if __name__ == '__main__':
     test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
     create_test_directory(5, test_direc_path)
-    dups = get_duplicates(test_direc_path)
-    print(dups)
-    remove(dups)
-    dups = get_duplicates(test_direc_path)#
-    print(dups)
