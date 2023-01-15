@@ -170,9 +170,9 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
         file_name = "file_" + str(i) + ".txt"
         with open(file_name, 'w') as f:
             f.write(f'This is a randomly generated unique file. Path hash: {hash(location + file_name)}')
-
+    # Do the same again for some of the directories we just created.
     for i in range(num_direc):
-        if random.randint(0,1) == 1:
+        if random.randint(0, 1) == 1:  # 50% of the subdirectories will have subdirectories.
             create_test_directory(depth - 1, location=os.path.join(location, f'dir_{i}'))
 
 
