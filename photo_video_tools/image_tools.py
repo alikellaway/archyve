@@ -1,12 +1,10 @@
 import os
-import sys
 import shutil
 import PIL
 from PIL import Image, ExifTags
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
-import generics.struc_manip as sm
-from pprint import pprint
+import struc_manip as sm
 
 
 def get_image_exif_from_path(image_path: str) -> dict[str: int]:

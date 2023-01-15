@@ -177,5 +177,5 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
 
 
 if __name__ == '__main__':
-    test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
+    test_direc_path = "/test_direc"
     create_test_directory(5, test_direc_path)
