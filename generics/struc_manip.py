@@ -139,44 +139,46 @@ def remove_duplicates(directory):
     return remove(get_duplicates(directory))
 
 
-def create_test_directory(depth, root_path, duplicate_percentage=25):
+def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, max_directs=3, max_files=5):
+    """
+    Creates a random directory tree populated with text filese. Some of which are duplicates.
+    :param depth: The depth of the tree to create.
+    :param location: The location in which to create the tree.
+    :param duplicate_percentage: The percentage of the txt files that will be duplicates.
+    :param max_directs: The maximum number of directories that can be created on each level of the tree.
+    :param max_files: The maximum number of files that can be created on each level of the tree.
+    :return:
+    """
     if depth == 0:
         return
-    os.chdir(root_path)
-    current_directory = os.getcwd()
-    for i in range(random.randint(1, 3)):
-        dir_name = "dir_" + str(i)
-        os.mkdir(dir_name)
-        os.chdir(dir_name)
-
-        # Create a random number of text files in the current directory
-        num_files = random.randint(1, 5)
-        duplicate_files = int(num_files * (duplicate_percentage / 100))
-        unique_files = num_files - duplicate_files
-        file_content = "This is a randomly generated text file."
-        for j in range(duplicate_files):
-            file_name = "file_" + str(j) + ".txt"
-            with open(file_name, 'w') as f:
-                f.write(file_content)
-        for j in range(unique_files):
-            file_name = "file_" + str(j+duplicate_files) + ".txt"
-            with open(file_name, 'w') as f:
-                f.write("This is a unique randomly generated text file.")
-
-        create_test_directory(depth - 1, current_directory, duplicate_percentage=duplicate_percentage)
-        os.chdir(current_directory)
-
-def create_random_tree(depth, current_path):
-    if depth == 0:
-        return
-    os.chdir(current_path)
-    num_direc = random.randint(1,3)
+    os.chdir(location)
+    num_direc = random.randint(1, max_directs)
     for i in range(0, num_direc + 1):
         dir_name = "dir_" + str(i)
         os.mkdir(dir_name)
-    create_random_tree(depth - 1, os.path.join(current_path, f'dir_{random.randint(0,num_direc)}'))
+    # Populate the direc with some files that can be duplicates
+    num_files = random.randint(1, max_files)
+    dup_files = int(num_files * (duplicate_percentage / 100))
+    unique_files = num_files - dup_files
+    # Create the dup files
+    for i in range(dup_files):
+        file_name = "file_" + str(i) + ".txt"
+        with open(file_name, 'w') as f:
+            f.write("This is a randomly generated duplicate file.")
+    # Create the unique files
+    for i in range(unique_files):
+        file_name = "file_" + str(i) + ".txt"
+        with open(file_name, 'w') as f:
+            f.write(f'This is a randomly generated unique file. Path hash: {hash(location + file_name)}')
+
+    create_test_directory(depth - 1, location=os.path.join(location, f'dir_{random.randint(0, num_direc)}'))
 
 
 if __name__ == '__main__':
-    # create_test_directory(5, "C:\\Users\\alike\\git\\media_tools\\test_direc")
-    create_random_tree(5, "C:\\Users\\alike\\git\\media_tools\\test_direc")
+    test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
+    create_test_directory(5, test_direc_path)
+    dups = get_duplicates(test_direc_path)
+    print(dups)
+    remove(dups)
+    dups = get_duplicates(test_direc_path)#
+    print(dups)
