@@ -4,6 +4,7 @@ Module contains functions useful for interacting with and manipulating file syst
 
 import hashlib
 import os
+import random
 from sys import path as syspath
 
 
@@ -138,12 +139,36 @@ def remove_duplicates(directory):
     return remove(get_duplicates(directory))
 
 
-def create_test_directory(location=syspath[0], depth=3, filecount_max=10):
-    for d in range(0, depth):
-        os.mkdir(location)
+def create_test_directory(depth, duplicate_percentage=20, root_path=syspath[0]):
+    if depth == 0:
+        return
+    os.chdir(root_path)
+    current_directory = os.getcwd()
+    for i in range(random.randint(1, 3)):
+        dir_name = "dir_" + str(i)
+        while os.path.exists(dir_name):
+            dir_name = "dir_" + str(random.randint(0, 1000))
+        os.mkdir(dir_name)
+        os.chdir(dir_name)
 
+        # Create a random number of text files in the current directory
+        num_files = random.randint(1, 5)
+        duplicate_files = int(num_files * (duplicate_percentage / 100))
+        unique_files = num_files - duplicate_files
+        file_content = "This is a randomly generated text file."
+        for j in range(duplicate_files):
+            file_name = "file_" + str(j) + ".txt"
+            with open(file_name, 'w') as f:
+                f.write(file_content)
+        for j in range(unique_files):
+            file_name = "file_" + str(j+duplicate_files) + ".txt"
+            with open(file_name, 'w') as f:
+                f.write("This is a unique randomly generated text file.")
+
+        create_test_directory(depth - 1, duplicate_percentage, current_directory)
+        os.chdir(current_directory)
 
 
 if __name__ == '__main__':
-    create_test_directory()
+    create_test_directory(5, root_path="C:\\Users\\alike\\git\\media_tools\\test_direc")
 
