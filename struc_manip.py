@@ -7,6 +7,7 @@ import os
 import random
 from sys import path as syspath
 import shutil
+from pprint import pprint
 
 def files_equal(file1, file2):
     """
@@ -94,22 +95,86 @@ def name_from_path(path):
         return None
 
 
-def get_duplicates(direc_path):
+def get_duplicates(include, exclude=None):
     """
     Returns the paths of files that have equal content to another file in the directory. The first instance is not in
     the output.
-    :param direc_path: The directory in which to search for duplicates.
+    :param exclude: A list of directories or files to exclude from the search.
+    :param include: The directory or directories in which to start searching for duplicates.
     :return: A list of paths of files that are duplicates of another files.
     """
-    paths = get_subpaths(direc_path)
-    hashes = set()
-    duplicates = []
+    if isinstance(include, str):  # One directory given
+        paths = get_subpaths(include)
+    elif isinstance(include, list):  # Multiple directories given
+        paths = []
+        for d in include:
+            paths += get_subpaths(d)
+    else:  # Not implemented
+        raise NotImplementedError
+    hashes = set()  # Use set to see if path is already seen
+    duplicates = []  # List will store the paths of duplicate items
+    # Filter paths to exclude those in exclude list
+    if exclude is not None:
+        exc = []
+        if isinstance(exclude, str):
+            exc.append(exclude)
+        elif isinstance(exclude, list):
+            exc += exclude
+        else:
+            raise NotImplementedError
+        for path in paths:
+            for exclusion in exc:
+                if path.find(exclusion):
+                    paths.remove(path)
+    # Now comb for duplicates
     for path in paths:
         size = len(hashes)
         hashes.add(hash_from_path(path))
         if size < len(hashes):
             duplicates.append(path)
     return duplicates
+
+
+def get_duplicates2(include, exclude=None):
+    # Get the set of paths in the include directories.
+    if isinstance(include, str):  # One directory given
+        paths = get_subpaths(include)
+    elif isinstance(include, list):  # Multiple directories given
+        paths = []
+        for d in include:
+            paths += get_subpaths(d)
+    else:  # Not implemented
+        raise NotImplementedError
+    # Filter out the paths that are included in the exclude, if there are any.
+    if exclude is not None:
+        exc = []
+        if isinstance(exclude, str):
+            exc.append(exclude)
+        elif isinstance(exclude, list):
+            exc += exclude
+        else:
+            raise NotImplementedError
+        for path in paths:
+            for exclusion in exc:
+                if path.find(exclusion):
+                    paths.remove(path)
+
+    hash_path_dict = {}
+    for path in paths:
+        file_hash = hash_from_path(path)
+        if hash_path_dict.get(file_hash) is None:
+            hash_path_dict[file_hash] = [path]
+        else:
+            hash_path_dict.get(file_hash).append(path)
+
+    # Filter through to find the hashes with multiple paths mapped (these are dup files).
+    rmv = []
+    for key, value in hash_path_dict.items():
+        if not len(value) > 1:
+            rmv.append(key)
+    for key in rmv:
+        del hash_path_dict[key]
+    return hash_path_dict
 
 
 def remove(paths):
@@ -166,7 +231,7 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
         with open(file_name, 'w') as f:
             f.write("This is a randomly generated duplicate file.")
     # Create the unique files
-    for i in range(unique_files):
+    for i in range(dup_files, unique_files + dup_files):
         file_name = "file_" + str(i) + ".txt"
         with open(file_name, 'w') as f:
             f.write(f'This is a randomly generated unique file. Path hash: {hash(location + file_name)}')
@@ -204,6 +269,7 @@ def cut(filepath, destination, newname=None):
 
 
 if __name__ == '__main__':
-    # test_direc_path = "/test_direc"
-    # create_test_directory(5, test_direc_path)
-    cut("cuttest.txt", "test_direc")
+    test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
+    create_test_directory(5, test_direc_path)
+    dup = get_duplicates2(test_direc_path)
+    pprint(dup)
