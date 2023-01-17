@@ -136,17 +136,17 @@ def get_duplicates(include, exclude=None):
 
 
 def get_duplicates2(include, exclude=None):
-    # Get the set of paths in the include directories.
+    print(f'Searching for duplicate files in:\n\t{include}')
     if isinstance(include, str):  # One directory given
         paths = get_subpaths(include)
     elif isinstance(include, list):  # Multiple directories given
         paths = []
         for d in include:
             paths += get_subpaths(d)
-    else:  # Not implemented
+    else:
         raise NotImplementedError
-    # Filter out the paths that are included in the exclude, if there are any.
     if exclude is not None:
+        print(f'Excluding directories and files under:')
         exc = []
         if isinstance(exclude, str):
             exc.append(exclude)
@@ -154,9 +154,11 @@ def get_duplicates2(include, exclude=None):
             exc += exclude
         else:
             raise NotImplementedError
+        for path in exc:
+            print(f'\t{path}\n')
         for path in paths:
             for exclusion in exc:
-                if path.find(exclusion):
+                if os.path.commonpath([path, exclusion]):
                     paths.remove(path)
 
     hash_path_dict = {}
@@ -269,7 +271,13 @@ def cut(filepath, destination, newname=None):
 
 
 if __name__ == '__main__':
-    test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
-    create_test_directory(5, test_direc_path)
-    dup = get_duplicates2(test_direc_path)
+    import time
+
+    start_time = time.time()
+    # test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
+    pictures = f'D:\\Pictures'
+    # create_test_directory(5, test_direc_path)
+    dup = get_duplicates2(pictures, exclude=f'{pictures}\\Unsortables')
+    dur = time.time() - start_time
     pprint(dup)
+    print("--- %s seconds ---" % dur)
