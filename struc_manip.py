@@ -53,32 +53,20 @@ def subdirs(directory: Path | str) -> list[Path]:
     direc = path_handler(directory).resolve()
     return [Path(f'{direc}') / f.name for f in os.scandir(direc) if f.is_dir()]
 
+
 def get_subpaths(directory: Path | str) -> list[Path]:
     """
     Use to get the paths of every sub file in every sub folder into one list.
     :param directory: The directory to recursively unpack.
     :return: A list of string paths of each sub file.
     """
-    directory = path_handler(directory)
-    os.chdir(directory)
-    sd = subdirs(directory)
-    sf = subfiles(directory)
+    direc = path_handler(directory)
+    sd = subdirs(direc)
+    sf = subfiles(direc)
     if sd:  # if list not empty.
         for d in sd:
             sf += get_subpaths(d)
     return sf
-
-
-def name_from_path(path: Path):
-    """
-    Returns a files name given its path.
-    :param path: The file path.
-    :return: The name of the file.
-    """
-    try:
-        return path.name.split("\\")[-1]
-    except IndexError:
-        return None
 
 
 def get_duplicates(include: Path, exclude=None):
@@ -229,34 +217,12 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
             create_test_directory(depth - 1, location=os.path.join(location, f'dir_{i}'))
 
 
-def cut(filepath, destination, newname=None):
-    os.chdir(syspath[0])
-    src = filepath
-    temp_folder_name = "cut_temp_folder"
-    if newname is not None:
-        os.mkdir(temp_folder_name)
-        temp_path = f'{os.getcwd()}\\{temp_folder_name}'
-        shutil.copy(filepath, temp_path)
-        newpath = f'{temp_path}\\{newname}'
-        os.rename(f'{temp_path}\\{name_from_path(filepath)}', newpath)
-        src = newpath
-
-    try:
-        shutil.copy(src, destination)
-        print(src)
-        os.remove(filepath)
-    except FileExistsError:
-        raise FileExistsError
-    except FileNotFoundError:
-        raise FileNotFoundError
-    finally:
-        if newname is not None:
-            # Delete the temp
-            os.remove(src)
-            os.rmdir(f'{syspath[0]}\\{temp_folder_name}')
-
-
 def path_handler(path: str | Path) -> Path:
+    """
+    Takes an input string or path and returns a path object allowing other functions to handle both strings and paths with only one line.
+    :param path: The string or Path object.
+    :return: A path object.
+    """
     return Path(path) if isinstance(path, str) else path
 
 
