@@ -8,8 +8,10 @@ import random
 from sys import path as syspath
 import shutil
 from pprint import pprint
+from pathlib import Path
 
-def files_equal(file1, file2):
+
+def files_equal(file1: Path, file2: Path):
     """
     Hashes the files at the given paths and returns whether they have equal content.
     :param file1: The location of one of the files in the comparison.
@@ -19,44 +21,44 @@ def files_equal(file1, file2):
     return hash_from_path(file1) == hash_from_path(file2)
 
 
-def hash_from_path(filepath):
+def hash_from_path(path: Path) -> str:
     hasher = hashlib.md5()
-    with open(filepath, 'rb') as f:
+    with open(path.name, 'rb') as f:
         buf = f.read()
         hasher.update(buf)
         return hasher.hexdigest()
 
 
-def get_file_size(filepath):
+def get_file_size(path: Path) -> int:
     """
     Returns the size of the file in bytes.
-    :param filepath: The file's location.
+    :param path: The file's location.
     :return: int The size of the file in bytes.
     """
-    return os.path.getsize(filepath)
+    return os.path.getsize(path.name)
 
 
-def subfiles(directory: str) -> list[str]:
+def subfiles(directory: Path) -> list[Path]:
     """
     Returns a list of paths of the files in the given directory.
     :param directory: The directory in which to search.
     :return: The list of file paths in the given directory.
     """
     os.chdir(directory)
-    return [f'{os.getcwd()}\\{f.name}' for f in os.scandir() if f.is_file()]
+    return [Path(f'{os.getcwd()}\\{f.name}') for f in os.scandir() if f.is_file()]
 
 
-def subdirs(directory: str) -> list[str]:
+def subdirs(directory: Path) -> list[Path]:
     """
     Returns a list of paths of the sub-folders to the given directory.
     :param directory: The string path of the folder from which to extract the paths of sub-folders from.
     :return: A list of sub folder paths.
     """
     os.chdir(directory)
-    return [f'{os.getcwd()}\\{f.name}' for f in os.scandir() if f.is_dir()]
+    return [Path(f'{os.getcwd()}\\{f.name}') for f in os.scandir() if f.is_dir()]
 
 
-def get_subpaths(directory: str) -> list[str]:
+def get_subpaths(directory: Path) -> list[Path]:
     """
     Use to get the paths of every sub file in every sub folder into one list.
     :param directory: The directory to recursively unpack.
@@ -71,31 +73,31 @@ def get_subpaths(directory: str) -> list[str]:
     return sf
 
 
-def extension(path):
+def extension(path: Path):
     """
     Retrieves a file's extension given its path or None if one is not found.
     :param path:
     :return:
     """
     try:
-        return path.split(".")[1]
+        return path.name.split(".")[1]
     except IndexError:
         return None
 
 
-def name_from_path(path):
+def name_from_path(path: Path):
     """
     Returns a files name given its path.
     :param path: The file path.
     :return: The name of the file.
     """
     try:
-        return path.split("\\")[-1]
+        return path.name.split("\\")[-1]
     except IndexError:
         return None
 
 
-def get_duplicates(include, exclude=None):
+def get_duplicates(include: Path, exclude=None):
     """
     Returns the paths of files that have equal content to another file in the directory. The first instance is not in
     the output.
@@ -103,7 +105,7 @@ def get_duplicates(include, exclude=None):
     :param include: The directory or directories in which to start searching for duplicates.
     :return: A list of paths of files that are duplicates of another files.
     """
-    if isinstance(include, str):  # One directory given
+    if isinstance(include, Path):  # One directory given
         paths = get_subpaths(include)
     elif isinstance(include, list):  # Multiple directories given
         paths = []
@@ -124,7 +126,7 @@ def get_duplicates(include, exclude=None):
             raise NotImplementedError
         for path in paths:
             for exclusion in exc:
-                if path.find(exclusion):
+                if path.name.find(exclusion):
                     paths.remove(path)
     # Now comb for duplicates
     for path in paths:
@@ -135,9 +137,9 @@ def get_duplicates(include, exclude=None):
     return duplicates
 
 
-def get_duplicates2(include, exclude=None):
+def get_duplicates2(include: Path, exclude=None):
     print(f'Searching for duplicate files in:\n\t{include}')
-    if isinstance(include, str):  # One directory given
+    if isinstance(include, Path):  # One directory given
         paths = get_subpaths(include)
     elif isinstance(include, list):  # Multiple directories given
         paths = []
@@ -179,7 +181,7 @@ def get_duplicates2(include, exclude=None):
     return hash_path_dict
 
 
-def remove(paths):
+def remove(paths: Path | list[Path]) -> list[Path]:
     """
     Removes the file at the given path, or multiple files from a list of paths.
     :param paths: A list of file paths to be removed.
@@ -197,7 +199,7 @@ def remove(paths):
     return failed
 
 
-def remove_duplicates(directory):
+def remove_duplicates(directory: Path):
     """
     Removes duplicate files from the given directory based on content.
     :param directory: The directory to check for duplicates.
