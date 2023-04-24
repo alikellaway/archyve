@@ -11,7 +11,7 @@ from pprint import pprint
 from pathlib import Path
 
 
-def files_equal(file1: Path, file2: Path):
+def files_equal(file1: Path | str, file2: Path | str) -> bool:
     """
     Hashes the files at the given paths and returns whether they have equal content.
     :param file1: The location of one of the files in the comparison.
@@ -21,68 +21,53 @@ def files_equal(file1: Path, file2: Path):
     return hash_from_path(file1) == hash_from_path(file2)
 
 
-def hash_from_path(path: Path) -> str:
+def hash_from_path(path: Path | str) -> str:
+    """ 
+    Returns the hash of a file given its path.
+    :param path: The path to the file to get the hash for.
+    :return: A string hash of the file at the path.
+    """
     hasher = hashlib.md5()
-    with open(path.name, 'rb') as f:
+    with open(path_handler(path).resovle(), 'rb') as f:
         buf = f.read()
         hasher.update(buf)
         return hasher.hexdigest()
 
 
-def get_file_size(path: Path) -> int:
-    """
-    Returns the size of the file in bytes.
-    :param path: The file's location.
-    :return: int The size of the file in bytes.
-    """
-    return os.path.getsize(path.name)
-
-
-def subfiles(directory: Path) -> list[Path]:
+def subfiles(directory: Path | str) -> list[Path]:
     """
     Returns a list of paths of the files in the given directory.
     :param directory: The directory in which to search.
     :return: The list of file paths in the given directory.
     """
-    os.chdir(directory)
+    os.chdir(path_handler(directory).resolve())
     return [Path(f'{os.getcwd()}\\{f.name}') for f in os.scandir() if f.is_file()]
 
 
-def subdirs(directory: Path) -> list[Path]:
+def subdirs(directory: Path | str) -> list[Path]:
     """
     Returns a list of paths of the sub-folders to the given directory.
     :param directory: The string path of the folder from which to extract the paths of sub-folders from.
     :return: A list of sub folder paths.
     """
-    os.chdir(directory)
+    os.chdir(path_handler(directory).resolve())
     return [Path(f'{os.getcwd()}\\{f.name}') for f in os.scandir() if f.is_dir()]
 
 
-def get_subpaths(directory: Path) -> list[Path]:
+def get_subpaths(directory: Path | str) -> list[Path]:
     """
     Use to get the paths of every sub file in every sub folder into one list.
     :param directory: The directory to recursively unpack.
     :return: A list of string paths of each sub file.
     """
+    directory = path_handler(directory)
     os.chdir(directory)
     sd = subdirs(directory)
     sf = subfiles(directory)
-    if not not sd:  # if list not empty.
+    if sd:  # if list not empty.
         for d in sd:
             sf += get_subpaths(d)
     return sf
-
-
-def extension(path: Path):
-    """
-    Retrieves a file's extension given its path or None if one is not found.
-    :param path:
-    :return:
-    """
-    try:
-        return path.name.split(".")[1]
-    except IndexError:
-        return None
 
 
 def name_from_path(path: Path):
@@ -270,6 +255,10 @@ def cut(filepath, destination, newname=None):
             # Delete the temp
             os.remove(src)
             os.rmdir(f'{syspath[0]}\\{temp_folder_name}')
+
+
+def path_handler(path: str | Path) -> Path:
+    return Path(path) if isinstance(path, str) else path
 
 
 if __name__ == '__main__':
