@@ -2,12 +2,10 @@
 Module contains functions useful for interacting with and manipulating file systems and structures.
 """
 
-import hashlib
-import os
-import random
+from hashlib import md5
+from os import scandir, path, remove as osrmv, chdir, mkdir
+from random import randint
 from sys import path as syspath
-import shutil
-from pprint import pprint
 from pathlib import Path
 
 
@@ -27,7 +25,7 @@ def hash_from_path(path: Path | str) -> str:
     :param path: The path to the file to get the hash for.
     :return: A string hash of the file at the path.
     """
-    hasher = hashlib.md5()
+    hasher = md5()
     with open(path_handler(path).resovle(), 'rb') as f:
         buf = f.read()
         hasher.update(buf)
@@ -41,7 +39,7 @@ def subfiles(directory: Path | str) -> list[Path]:
     :return: The list of file paths in the given directory.
     """
     direc = path_handler(directory).resolve()
-    return [Path(f'{direc}') / f.name for f in os.scandir(direc) if f.is_file()]
+    return [Path(f'{direc}') / f.name for f in scandir(direc) if f.is_file()]
 
 
 def subdirs(directory: Path | str) -> list[Path]:
@@ -51,7 +49,7 @@ def subdirs(directory: Path | str) -> list[Path]:
     :return: A list of sub folder paths.
     """
     direc = path_handler(directory).resolve()
-    return [Path(f'{direc}') / f.name for f in os.scandir(direc) if f.is_dir()]
+    return [Path(f'{direc}') / f.name for f in scandir(direc) if f.is_dir()]
 
 
 def get_subpaths(directory: Path | str) -> list[Path]:
@@ -132,7 +130,7 @@ def get_duplicates2(include: Path, exclude=None):
             print(f'\t{path}\n')
         for path in paths:
             for exclusion in exc:
-                if os.path.commonpath([path, exclusion]):
+                if path.commonpath([path, exclusion]):
                     paths.remove(path)
 
     hash_path_dict = {}
@@ -164,7 +162,7 @@ def remove(paths: Path | list[Path]) -> list[Path]:
     failed = []  # A list of paths that failed to be removed.
     for p in paths:
         try:
-            os.remove(p)
+            osrmv(p)
         except FileExistsError:
             failed.append(p)
             continue
@@ -192,13 +190,13 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
     """
     if depth == 0:
         return
-    os.chdir(location)
-    num_direc = random.randint(1, max_directs)
+    chdir(location)
+    num_direc = randint(1, max_directs)
     for i in range(0, num_direc + 1):
         dir_name = "dir_" + str(i)
-        os.mkdir(dir_name)
+        mkdir(dir_name)
     # Populate the direc with some files that can be duplicates
-    num_files = random.randint(1, max_files)
+    num_files = randint(1, max_files)
     dup_files = int(num_files * (duplicate_percentage / 100))
     unique_files = num_files - dup_files
     # Create the dup files
@@ -213,8 +211,8 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
             f.write(f'This is a randomly generated unique file. Path hash: {hash(location + file_name)}')
     # Do the same again for some of the directories we just created.
     for i in range(num_direc):
-        if random.randint(0, 1) == 1:  # 50% of the subdirectories will have subdirectories.
-            create_test_directory(depth - 1, location=os.path.join(location, f'dir_{i}'))
+        if randint(0, 1) == 1:  # 50% of the subdirectories will have subdirectories.
+            create_test_directory(depth - 1, location=path.join(location, f'dir_{i}'))
 
 
 def path_handler(path: str | Path) -> Path:
