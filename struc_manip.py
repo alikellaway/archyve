@@ -50,9 +50,8 @@ def subdirs(directory: Path | str) -> list[Path]:
     :param directory: The string path of the folder from which to extract the paths of sub-folders from.
     :return: A list of sub folder paths.
     """
-    os.chdir(path_handler(directory).resolve())
-    return [Path(f'{os.getcwd()}\\{f.name}') for f in os.scandir() if f.is_dir()]
-
+    direc = path_handler(directory).resolve()
+    return [Path(f'{direc}') / f.name for f in os.scandir(direc) if f.is_dir()]
 
 def get_subpaths(directory: Path | str) -> list[Path]:
     """
