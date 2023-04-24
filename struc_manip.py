@@ -7,6 +7,7 @@ from os import scandir, path, remove as osrmv, chdir, mkdir
 from random import randint
 from sys import path as syspath
 from pathlib import Path
+from typing import Iterable
 
 
 def files_equal(file1: Path | str, file2: Path | str) -> bool:
@@ -67,7 +68,7 @@ def get_subpaths(directory: Path | str) -> list[Path]:
     return sf
 
 
-def get_duplicates(include: Path, exclude=None):
+def get_duplicates(include: str | Path | Iterable[Path] | Iterable[str], exclude: str | Path | Iterable[Path] = None) -> Iterable[Path]:
     """
     Returns the paths of files that have equal content to another file in the directory. The first instance is not in
     the output.
@@ -75,28 +76,29 @@ def get_duplicates(include: Path, exclude=None):
     :param include: The directory or directories in which to start searching for duplicates.
     :return: A list of paths of files that are duplicates of another files.
     """
-    if isinstance(include, Path):  # One directory given
+    # Change logic depending on whether the input is a single path of a list of paths.
+    paths: Iterable[Path] = []
+    if isinstance(include, Path):
         paths = get_subpaths(include)
-    elif isinstance(include, list):  # Multiple directories given
-        paths = []
+    elif isinstance(include, list):
         for d in include:
             paths += get_subpaths(d)
     else:  # Not implemented
         raise NotImplementedError
     hashes = set()  # Use set to see if path is already seen
-    duplicates = []  # List will store the paths of duplicate items
+    duplicates = []  # List will store the paths of duplicate items (all the paths of each duplicate e.i. both photo 1 and photo 2)
     # Filter paths to exclude those in exclude list
     if exclude is not None:
-        exc = []
+        exc: Iterable[Path] = []
         if isinstance(exclude, str):
-            exc.append(exclude)
-        elif isinstance(exclude, list):
-            exc += exclude
+            exc.append(path_handler(exclude))
+        elif isinstance(exclude, Iterable):
+            exc += list(exclude)
         else:
             raise NotImplementedError
         for path in paths:
             for exclusion in exc:
-                if path.name.find(exclusion):
+                if path.resolve().find(exclusion.resolve()):
                     paths.remove(path)
     # Now comb for duplicates
     for path in paths:
@@ -107,9 +109,9 @@ def get_duplicates(include: Path, exclude=None):
     return duplicates
 
 
-def get_duplicates2(include: Path, exclude=None):
+def get_duplicates2(include: Path | Iterable[Path], exclude=None):
     print(f'Searching for duplicate files in:\n\t{include}')
-    if isinstance(include, Path):  # One directory given
+    if isinstance(include, Path) or isinstance(include, str):  # One directory given
         paths = get_subpaths(include)
     elif isinstance(include, list):  # Multiple directories given
         paths = []
@@ -221,8 +223,12 @@ def path_handler(path: str | Path) -> Path:
     :param path: The string or Path object.
     :return: A path object.
     """
-    return Path(path) if isinstance(path, str) else path
-
+    if isinstance(path, Path):
+        return path
+    if isinstance(path, str):
+        return Path(path)
+    raise NotImplementedError(f'Cannot convert object of type \'{type(path)}\' into a Path object.')
+    
 
 if __name__ == '__main__':
     # import time
@@ -235,3 +241,5 @@ if __name__ == '__main__':
     # pprint(dup)
     # print("--- %s seconds ---" % dur)
     print(subfiles("venv/Scripts"))
+    l = [12,13]
+    print(Path(l))
