@@ -144,12 +144,15 @@ def get_duplicates2(include: Path | Iterable[Path], exclude=None):
             hash_path_dict.get(file_hash).append(path)
 
     # Filter through to find the hashes with multiple paths mapped (these are dup files).
-    rmv = []
-    for key, value in hash_path_dict.items():
-        if not len(value) > 1:
-            rmv.append(key)
-    for key in rmv:
-        del hash_path_dict[key]
+    # rmv = []
+    # for key, value in hash_path_dict.items():
+    #     if not len(value) > 1:
+    #         rmv.append(key)
+    # for key in rmv:
+    #     del hash_path_dict[key]
+    for key in hash_path_dict.keys():
+        if not len(hash_path_dict[key]) > 1:
+            del hash_path_dict[key]
     return hash_path_dict
 
 
