@@ -32,7 +32,7 @@ def hash_from_path(path: Path | str) -> str:
         buf = f.read()
         hasher.update(buf)
         return hasher.hexdigest()
-
+    
 
 def subfiles(directory: Path | str) -> list[Path]:
     """
@@ -40,8 +40,8 @@ def subfiles(directory: Path | str) -> list[Path]:
     :param directory: The directory in which to search.
     :return: The list of file paths in the given directory.
     """
-    os.chdir(path_handler(directory).resolve())
-    return [Path(f'{os.getcwd()}\\{f.name}') for f in os.scandir() if f.is_file()]
+    direc = path_handler(directory).resolve()
+    return [Path(f'{direc}') / f.name for f in os.scandir(direc) if f.is_file()]
 
 
 def subdirs(directory: Path | str) -> list[Path]:
@@ -262,13 +262,13 @@ def path_handler(path: str | Path) -> Path:
 
 
 if __name__ == '__main__':
-    import time
+    # import time
 
-    start_time = time.time()
-    # test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
-    pictures = f'D:\\Pictures'
-    # create_test_directory(5, test_direc_path)
-    dup = get_duplicates2(pictures, exclude=f'{pictures}\\Unsortables')
-    dur = time.time() - start_time
-    pprint(dup)
-    print("--- %s seconds ---" % dur)
+    # start_time = time.time()
+    # # test_direc_path = "C:\\Users\\alike\\git\\media_tools\\test_direc"
+    # pictures = f'D:\\Pictures'
+    # # create_test_directory(5, test_direc_path)
+    # dur = time.time() - start_time
+    # pprint(dup)
+    # print("--- %s seconds ---" % dur)
+    print(subfiles("venv/Scripts"))
