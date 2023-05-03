@@ -27,7 +27,7 @@ def hash_from_path(path: Path | str) -> str:
     :return: A string hash of the file at the path.
     """
     hasher = md5()
-    with open(path_handler(path).resovle(), 'rb') as f:
+    with open(path_handler(path).resolve(), 'rb') as f:
         buf = f.read()
         hasher.update(buf)
         return hasher.hexdigest()
