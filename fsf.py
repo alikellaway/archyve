@@ -3,11 +3,13 @@ Module contains functions useful for interacting with and manipulating file syst
 """
 
 from hashlib import md5
-from os import scandir, path, remove as osrmv, chdir, mkdir
+from os import scandir, path as ospath, remove as osrmv, chdir, mkdir, listdir
 from random import randint
 from sys import path as syspath
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Generator
+from itertools import chain
+from shutil import move
 
 
 def files_equal(file1: Path | str, file2: Path | str) -> bool:
@@ -31,139 +33,93 @@ def hash_from_path(path: Path | str) -> str:
         buf = f.read()
         hasher.update(buf)
         return hasher.hexdigest()
-    
 
-def subfiles(directory: Path | str) -> list[Path]:
+
+def subfiles(directory: Path | str) -> Generator:
     """
     Returns a list of paths of the files in the given directory.
     :param directory: The directory in which to search.
     :return: The list of file paths in the given directory.
     """
     direc = path_handler(directory).resolve()
-    return [Path(f'{direc}') / f.name for f in scandir(direc) if f.is_file()]
+    return (Path(f'{direc}') / f.name for f in scandir(direc) if f.is_file())
 
 
-def subdirs(directory: Path | str) -> list[Path]:
+def subdirs(directory: Path | str) -> Generator:
     """
     Returns a list of paths of the sub-folders to the given directory.
     :param directory: The string path of the folder from which to extract the paths of sub-folders from.
     :return: A list of sub folder paths.
     """
     direc = path_handler(directory).resolve()
-    return [Path(f'{direc}') / f.name for f in scandir(direc) if f.is_dir()]
+    return (Path(f'{direc}') / f.name for f in scandir(direc) if f.is_dir())
 
 
-def get_subpaths(directory: Path | str) -> list[Path]:
+def subpaths(directory: Path | str) -> Generator:
     """
-    Use to get the paths of every sub file in every sub folder into one list.
-    :param directory: The directory to recursively unpack.
-    :return: A list of string paths of each sub file.
+    Gets the resolved paths of every sub file in every sub folder into one list
+    (all end points in the tree below the entry point given).
+    :param directory: The root directory to get the tree of.
+    :return: An iterable of string paths of each sub file.
     """
     direc = path_handler(directory)
-    sd = subdirs(direc)
     sf = subfiles(direc)
-    if sd:  # if list not empty.
-        for d in sd:
-            sf += get_subpaths(d)
+    for d in subdirs(direc):
+        sf = chain(sf, subpaths(d))
     return sf
 
 
-def get_duplicates(include: str | Path | Iterable[Path] | Iterable[str], exclude: str | Path | Iterable[Path] = None) -> Iterable[Path]:
+def get_duplicates(include: Path | Iterable[Path], exclude: Path | Iterable[Path] = None):
     """
-    Returns the paths of files that have equal content to another file in the directory. The first instance is not in
-    the output.
-    :param exclude: A list of directories or files to exclude from the search.
-    :param include: The directory or directories in which to start searching for duplicates.
-    :return: A list of paths of files that are duplicates of another files.
+    Returns a dictionary of file hashes mapped to a list of paths that have that hash (these paths are duplicate files).
+    :param include: The list of paths to include in the search.
+    :param exclude: The list of paths to exclude in the search.
+    :return: A dictionary mapping file hashes to the paths that have files with that hash.
     """
-    # Change logic depending on whether the input is a single path of a list of paths.
-    paths: Iterable[Path] = []
-    if isinstance(include, Path):
-        paths = get_subpaths(include)
-    elif isinstance(include, list):
-        for d in include:
-            paths += get_subpaths(d)
-    else:  # Not implemented
-        raise NotImplementedError
-    hashes = set()  # Use set to see if path is already seen
-    duplicates = []  # List will store the paths of duplicate items (all the paths of each duplicate e.i. both photo 1 and photo 2)
-    # Filter paths to exclude those in exclude list
-    if exclude is not None:
-        exc: Iterable[Path] = []
-        if isinstance(exclude, str):
-            exc.append(path_handler(exclude))
-        elif isinstance(exclude, Iterable):
-            exc += list(exclude)
-        else:
-            raise NotImplementedError
-        for path in paths:
-            for exclusion in exc:
-                if path.resolve().find(exclusion.resolve()):
-                    paths.remove(path)
-    # Now comb for duplicates
-    for path in paths:
-        size = len(hashes)
-        hashes.add(hash_from_path(path))
-        if size < len(hashes):
-            duplicates.append(path)
-    return duplicates
-
-
-def get_duplicates2(include: Path | Iterable[Path], exclude=None):
-    print(f'Searching for duplicate files in:\n\t{include}')
+    # Find the paths of all the files to check for duplicates.
     if isinstance(include, Path) or isinstance(include, str):  # One directory given
-        paths = get_subpaths(include)
-    elif isinstance(include, list):  # Multiple directories given
-        paths = []
-        for d in include:
-            paths += get_subpaths(d)
+        paths = list(subpaths(include))
+    elif isinstance(include, Iterable):  # Multiple directories given
+        paths = [path for dir in include for path in subpaths(dir)]
     else:
         raise NotImplementedError
+
+    # Find the paths of all the files to exclude from the search.
     if exclude is not None:
-        print(f'Excluding directories and files under:')
-        exc = []
         if isinstance(exclude, str):
-            exc.append(exclude)
-        elif isinstance(exclude, list):
-            exc += exclude
+            exc = subpaths(exclude)
+        elif isinstance(exclude, Iterable):
+            exc = (path for dir in exclude for path in subpaths(dir))
         else:
             raise NotImplementedError
-        for path in exc:
-            print(f'\t{path}\n')
-        for path in paths:
-            for exclusion in exc:
-                if path.commonpath([path, exclusion]):
-                    paths.remove(path)
+        # Remove all the excluded paths.
+        for exc_path in exc:
+            try:
+                paths.remove(exc_path)
+            except ValueError:
+                continue
 
-    hash_path_dict = {}
+    hash_path_dict = {}  # A dictionary mapping file hash to the file path.
     for path in paths:
-        file_hash = hash_from_path(path)
-        if hash_path_dict.get(file_hash) is None:
-            hash_path_dict[file_hash] = [path]
-        else:
-            hash_path_dict.get(file_hash).append(path)
+        try:
+            hash_path_dict[hash := hash_from_path(path)].append(path)
+        except KeyError:
+            hash_path_dict[hash] = [path]
 
     # Filter through to find the hashes with multiple paths mapped (these are dup files).
-    # rmv = []
-    # for key, value in hash_path_dict.items():
-    #     if not len(value) > 1:
-    #         rmv.append(key)
-    # for key in rmv:
-    #     del hash_path_dict[key]
-    for key in hash_path_dict.keys():
-        if not len(hash_path_dict[key]) > 1:
-            del hash_path_dict[key]
-    return hash_path_dict
+    return dict(filter(lambda kvp: True if len(kvp[1]) > 1 else False, hash_path_dict.items()))
 
 
-def remove(paths: Path | list[Path]) -> list[Path]:
+def remove(paths: Path | Iterable[Path]) -> list[Path]:
     """
     Removes the file at the given path, or multiple files from a list of paths.
     :param paths: A list of file paths to be removed.
     :return: failed A list of file paths that failed to be removed.
     """
-    if isinstance(paths, str):
-        paths = [paths]
+    if isinstance(paths, Path):
+        paths = tuple(paths)
+    elif isinstance(paths, str):
+        paths = tuple(path_handler(paths))
     failed = []  # A list of paths that failed to be removed.
     for p in paths:
         try:
@@ -193,6 +149,7 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
     :param max_files: The maximum number of files that can be created on each level of the tree.
     :return:
     """
+    location = path_handler(location).resolve()
     if depth == 0:
         return
     chdir(location)
@@ -213,11 +170,14 @@ def create_test_directory(depth, location=syspath[0], duplicate_percentage=25, m
     for i in range(dup_files, unique_files + dup_files):
         file_name = "file_" + str(i) + ".txt"
         with open(file_name, 'w') as f:
-            f.write(f'This is a randomly generated unique file. Path hash: {hash(location + file_name)}')
+            f.write(
+                f'This is a randomly generated unique file. Path hash: {hash(str(location) + file_name)}')
     # Do the same again for some of the directories we just created.
     for i in range(num_direc):
-        if randint(0, 1) == 1:  # 50% of the subdirectories will have subdirectories.
-            create_test_directory(depth - 1, location=path.join(location, f'dir_{i}'))
+        # 50% of the subdirectories will have subdirectories.
+        if randint(0, 1) == 1:
+            create_test_directory(
+                depth - 1, location=ospath.join(location, f'dir_{i}'))
 
 
 def path_handler(path: str | Path) -> Path:
@@ -230,8 +190,58 @@ def path_handler(path: str | Path) -> Path:
         return path
     if isinstance(path, str):
         return Path(path)
-    raise NotImplementedError(f'Cannot convert object of type \'{type(path)}\' into a Path object.')
+    raise NotImplementedError(
+        f'Cannot convert object of type \'{type(path)}\' into a Path object.')
+
+
+def safe_move(source_path: Path, dest_path: Path):
+    """
+    Move all files from source directory or a single file to destination directory. The process is safe, any clashing names will be renamed.
+    :param source_path: The path of the file (or directory of files) to move to the destination path.
+    :param dest_path: The path of the place to move the file(s).
+    """
+    def get_unique_path(dest_path: Path):
+        """
+        Returns a unique path to avoid overwriting existing files
+        """
+        if dest_path.is_file():
+            base_name, extension = dest_path.stem, dest_path.suffix
+            i = 1
+            while True:
+                new_name = f"{base_name}_{i}{extension}"
+                new_path = dest_path.with_name(new_name)
+                if not new_path.is_file():
+                    return new_path
+                i += 1
+        else:
+            return dest_path
     
+    source_path = Path(source_path)
+    dest_path = Path(dest_path)
+
+    # Check if source_path is a file
+    if source_path.is_file():
+        # Move the file to the destination directory
+        dest_path = get_unique_path(source_path, dest_path)
+        move(str(source_path), str(dest_path))
+
+    # Check if source_path is a directory
+    elif source_path.is_dir():
+        # Create the destination directory if it doesn't exist
+        if not dest_path.exists():
+            dest_path.mkdir(parents=True)
+
+        # Move all files from the source directory to the destination directory
+        for file_path in source_path.glob("*"):
+            dest_file_path = dest_path / file_path.name
+
+            # Move the file to the destination directory
+            dest_file_path = get_unique_path(file_path, dest_file_path)
+            move(str(file_path), str(dest_file_path))
+
+    else:
+        print(f"Error: {source_path} is not a file or a directory.")
+
 
 if __name__ == '__main__':
     # import time
@@ -243,6 +253,4 @@ if __name__ == '__main__':
     # dur = time.time() - start_time
     # pprint(dup)
     # print("--- %s seconds ---" % dur)
-    print(subfiles("venv/Scripts"))
-    l = [12,13]
-    print(Path(l))
+    print(list(subfiles("venv/Scripts")))
