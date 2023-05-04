@@ -1,6 +1,3 @@
-import os
-import shutil
-
 from PIL import UnidentifiedImageError
 from PIL import Image, ExifTags
 from hachoir.parser import createParser
