@@ -78,9 +78,9 @@ def get_duplicates(include: Path | Iterable[Path], exclude: Path | Iterable[Path
     """
     # Find the paths of all the files to check for duplicates.
     if isinstance(include, Path) or isinstance(include, str):  # One directory given
-        paths = list(subpaths(include))
+        paths = set(subpaths(include))
     elif isinstance(include, Iterable):  # Multiple directories given
-        paths = [path for dir in include for path in subpaths(dir)]
+        paths = {path for dir in include for path in subpaths(dir)}
     else:
         raise NotImplementedError
 
@@ -96,7 +96,7 @@ def get_duplicates(include: Path | Iterable[Path], exclude: Path | Iterable[Path
         for exc_path in exc:
             try:
                 paths.remove(exc_path)
-            except ValueError:
+            except KeyError:
                 continue
 
     hash_path_dict = {}  # A dictionary mapping file hash to the file path.
