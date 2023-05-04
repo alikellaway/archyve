@@ -9,6 +9,7 @@ class MediaType(Enum):
     TEXT = auto()
     OTHER = auto()
 
+
 type_map = {
     MediaType.IMAGE: set(
         '.bmp',
@@ -63,7 +64,7 @@ type_map = {
         '.wav',
         '.wma'
     ),
-    MediaType.TEXT : set(
+    MediaType.TEXT: set(
         '.doc',
         '.docx',
         '.htm',
@@ -82,10 +83,11 @@ type_map = {
 
 def ext_to_media(ext: str):
     """
-    
+    Given a file extension, this function will return an enum pertaining to what type of media it is.
+    :param ext: The extension of the file to determine the media type of.
+    :return: The type of the media.
     """
-    for key in type_map.keys():
-        if ext in type_map[key]:
-            return key
+    for t in type_map.keys():
+        if ext in type_map[t]:
+            return t
     raise NotImplemented("This extension is not recognised as media.")
-
