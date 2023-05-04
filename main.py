@@ -1,4 +1,4 @@
-import struc_manip as sm
+import fsf as sm
 
 
 if __name__ == '__main__':

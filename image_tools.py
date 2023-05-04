@@ -5,7 +5,7 @@ from PIL import UnidentifiedImageError
 from PIL import Image, ExifTags
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
-import struc_manip as sm
+import fsf as sm
 
 
 def get_image_exif_from_path(image_path: str) -> dict[str: int]:
