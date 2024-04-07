@@ -1,17 +1,17 @@
+from hachoir.metadata import extractMetadata
+from hachoir.parser import createParser
 from PIL import UnidentifiedImageError
 from PIL import Image, ExifTags
-from hachoir.parser import createParser
-from hachoir.metadata import extractMetadata
-import fsf as sm
+from pathlib import Path
 
 
-def get_image_exif_from_path(image_path: str) -> dict[str: int]:
+def get_image_exif_from_path(image_path: Path | str) -> dict:
     """
     Returns the exif data for the image at the given path.
     :param image_path: The path for the image to check.
     :return: A dictionary containing the exif data.
     """
-    image = Image.open(image_path, mode='r')
+    image: Image = Image.open(image_path, mode='r')
     try:
         return {
             ExifTags.TAGS[k]: v
@@ -22,12 +22,7 @@ def get_image_exif_from_path(image_path: str) -> dict[str: int]:
         image.close()
 
 
-def show_from_path(image_path):
-    image = Image.open(image_path)
-    image.show()
-
-
-def get_datetime_name(path):
+def get_datetime_name(path: Path | str):
     """
     This function does its best to get the creation date of the media and then outputs that date concat with the
     original name.
@@ -43,9 +38,9 @@ def get_datetime_name(path):
             dt = None
 
     if dt is None or dt == '':
-        raise AttributeError
-    return f'{str(dt).replace(":", "-")} {sm.name_from_path(path)}'
+        raise AttributeError('File has no DateTime entry in EXIF data.')
 
+    return f'{str(dt).replace(":", "-")} {path.name}'
 
 
 if __name__ == "__main__":
