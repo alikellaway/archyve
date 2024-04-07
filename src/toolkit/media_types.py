@@ -13,10 +13,10 @@ class MediaType(Enum):
     An enumerator to represent different types of media.
     """
     IMAGE = auto()
-    SOUND = auto()
+    AUDIO = auto()
     VIDEO = auto()
     TEXT = auto()
-    OTHER = auto()
+    UNKNOWN = auto()
 
 
 SUFFIX_TO_MEDIATYPE_MAP: Final[dict[str, MediaType]] = {
@@ -41,32 +41,32 @@ SUFFIX_TO_MEDIATYPE_MAP: Final[dict[str, MediaType]] = {
     ".xbm": MediaType.IMAGE,
     ".xpm": MediaType.IMAGE,
     ".xwd": MediaType.IMAGE,
-    ".3g2": MediaType.SOUND,
-    ".3gp": MediaType.SOUND,
-    ".avi": MediaType.SOUND,
-    ".flv": MediaType.SOUND,
-    ".h264": MediaType.SOUND,
-    ".m4v": MediaType.SOUND,
-    ".mkv": MediaType.SOUND,
-    ".mov": MediaType.SOUND,
-    ".mp4": MediaType.SOUND,
-    ".mpeg": MediaType.SOUND,
-    ".mpg": MediaType.SOUND,
-    ".rm": MediaType.SOUND,
-    ".swf": MediaType.SOUND,
-    ".vob": MediaType.SOUND,
-    ".wmv": MediaType.SOUND,
-    ".aif": MediaType.VIDEO,
-    ".aifc": MediaType.VIDEO,
-    ".aiff": MediaType.VIDEO,
-    ".au": MediaType.VIDEO,
-    ".flac": MediaType.VIDEO,
-    ".m4a": MediaType.VIDEO,
-    ".mp3": MediaType.VIDEO,
-    ".ogg": MediaType.VIDEO,
-    ".ra": MediaType.VIDEO,
-    ".wav": MediaType.VIDEO,
-    ".wma": MediaType.VIDEO,
+    ".3g2": MediaType.VIDEO,
+    ".3gp": MediaType.VIDEO,
+    ".avi": MediaType.VIDEO,
+    ".flv": MediaType.VIDEO,
+    ".h264": MediaType.VIDEO,
+    ".m4v": MediaType.VIDEO,
+    ".mkv": MediaType.VIDEO,
+    ".mov": MediaType.VIDEO,
+    ".mp4": MediaType.VIDEO,
+    ".mpeg": MediaType.VIDEO,
+    ".mpg": MediaType.VIDEO,
+    ".rm": MediaType.VIDEO,
+    ".swf": MediaType.VIDEO,
+    ".vob": MediaType.VIDEO,
+    ".wmv": MediaType.VIDEO,
+    ".aif": MediaType.AUDIO,
+    ".aifc": MediaType.AUDIO,
+    ".aiff": MediaType.AUDIO,
+    ".au": MediaType.AUDIO,
+    ".flac": MediaType.AUDIO,
+    ".m4a": MediaType.AUDIO,
+    ".mp3": MediaType.AUDIO,
+    ".ogg": MediaType.AUDIO,
+    ".ra": MediaType.AUDIO,
+    ".wav": MediaType.AUDIO,
+    ".wma": MediaType.AUDIO,
     ".doc": MediaType.TEXT,
     ".docx": MediaType.TEXT,
     ".htm": MediaType.TEXT,
@@ -88,4 +88,4 @@ def get_media_type_of(path: Path | str) -> MediaType:
     :param path: The path to get the media type of.
     :return: The MediaType of the given path.
     """
-    return SUFFIX_TO_MEDIATYPE_MAP.get(Path(path).suffix, MediaType.OTHER)
+    return SUFFIX_TO_MEDIATYPE_MAP.get(Path(path).suffix, MediaType.UNKNOWN)
