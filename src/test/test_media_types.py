@@ -3,7 +3,7 @@ Module contains a unit test for the media_types module.
 
 Author: ali.kellaway139@gmail.com
 """
-from src.toolkit.media_types import get_media_type_of, MediaType
+from src.toolkit.media import get_media_type_of, MediaType
 from src.test.run_unit_tests import TEST_MATERIALS
 from unittest import TestCase
 from pathlib import Path
