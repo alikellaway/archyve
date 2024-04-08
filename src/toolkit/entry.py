@@ -3,16 +3,14 @@ Module contains logic to represent different kinds of entries in an archive.
 
 Author: ali.kellaway139@gmail.com
 """
+from PIL import Image, ExifTags, UnidentifiedImageError
 from os.path import getsize, getctime
-
-import PIL
-from PIL import Image, ExifTags
 from datetime import datetime
+from typing import Any, Union
 from functools import cache
 from enum import Enum, auto
 from pathlib import Path
 from hashlib import md5
-from typing import Any
 
 
 class EntryType(Enum):
@@ -113,7 +111,8 @@ class Entry:
         if not self.entry_type == EntryType.IMAGE:
             time_stamp: float = getctime(self.path)
         else:  # File is an image, look for the date it was taken.
-            date_taken: str | None = self.exif.get('DateTimeOriginal')
+            exif: dict | None = self.exif
+            date_taken: str | None = exif.get('DateTimeOriginal') if exif else None
             time_stamp: float = float(date_taken) if date_taken else getctime(self.path)
 
         return datetime.fromtimestamp(time_stamp)
@@ -130,10 +129,15 @@ class Entry:
             try:
                 with Image.open(self.path) as img:
                     return {ExifTags.TAGS[k]: v for k, v in img.getexif().items()}
-            except PIL.UnidentifiedImageError:
+            except UnidentifiedImageError:
                 return None
 
     @staticmethod
     @cache
     def __suffix_set():
         return set(Entry.EXTENSION_MAP.keys())
+
+    def __repr__(self):
+        return str(self.entry_type.name) + ' | ' + str(self.path)
+
+

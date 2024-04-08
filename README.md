@@ -1,6 +1,8 @@
-# Mass File Manager
+# Archive Manager
 
-The Mass File Manager is a Python tool designed to help users interact with and manage large archives of files efficiently. Whether you need to sort files, find duplicates, perform equality checks, or remove unnecessary files, this tool provides the necessary functionalities to streamline your file management tasks.
+Archive Manager is a Python tool designed to help users interact with and manage large archives of files efficiently. 
+Whether you need to sort files, find duplicates, perform equality checks, or remove unnecessary files, this tool 
+provides the necessary functionalities to streamline your file management tasks.
 
 ## Features
 
@@ -17,3 +19,16 @@ To use the Mass File Manager, follow these steps:
 
    ```bash
    git clone https://github.com/your-username/mass-file-manager.git
+2. Create a virtual environment for your project (if you don't already have one):
+   ```bash
+   py -m venv venv/
+3. Activate your virtual environment:
+   ```bash
+   cd venv/Scripts
+   ```
+   ```bash
+   .\activate
+
+4. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
