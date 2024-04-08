@@ -1,34 +1,34 @@
 """
-This module contains functions useful for managing media. Whether that be checking equality, removing, hashing or
-finding duplicates.
+This module contains functions useful for managing a archive of files. Whether that be checking equality, removing,
+hashing or finding duplicates.
 
 Author: ali.kellaway139@gmail.com
 """
 from src.toolkit.file_structure_functions import sub_paths
 from typing import Generator
 from pathlib import Path
-from media import Media
+from entry import Entry
 
 
-class MediaLibrary:
+class Archive:
 
     def __init__(self, *directory: Path | str):
         self.path: list[Path | str] = list(directory)
 
-    def media_file_paths(self) -> Generator[Path, None, None]:
+    def entry_file_paths(self) -> Generator[Path, None, None]:
         """
         Returns a generator of all the paths of all the files within all the folders (and their subfolders) in the
-        MediaLibrary.path attribute.
+        self.path attribute.
         :return: Generator containing all files (regardless of depth) within all the paths within self.path.
         """
         return (sp for path in self.path for sp in sub_paths(path))
 
-    def media(self) -> Generator[Media, None, None]:
+    def entries(self) -> Generator[Entry, None, None]:
         """
-        A generator of Media objects for all files found in the directories managed by this library.
-        :return: Generator of Media objects for all files under the libraries management.
+        A generator of Entry objects for all files found in the directories managed by this library.
+        :return: Generator of Entry objects for all files under the libraries management.
         """
-        return (Media(p) for p in self.media_file_paths())
+        return (Entry(p) for p in self.entry_file_paths())
 
     def duplicates(self) -> dict[int, list[Path]]:
         """
@@ -38,13 +38,13 @@ class MediaLibrary:
         """
         hashes_to_paths: dict[int, list[Path]] = {}
 
-        for media in self.media():
-            f_hash: int = hash(media)
+        for entry in self.entries():
+            f_hash: int = hash(entry)
             duplicates: list[Path] | None = hashes_to_paths.get(f_hash)
             if duplicates:
-                hashes_to_paths[f_hash].append(media.path)
+                hashes_to_paths[f_hash].append(entry.path)
             else:
-                hashes_to_paths[f_hash] = [media.path]
+                hashes_to_paths[f_hash] = [entry.path]
 
         return {file_hash: paths for file_hash, paths in hashes_to_paths.items() if len(paths) > 1}
 
