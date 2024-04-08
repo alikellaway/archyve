@@ -4,11 +4,15 @@ Module contains logic to represent different kinds of entries in an archive.
 Author: ali.kellaway139@gmail.com
 """
 from os.path import getsize, getctime
+
+import PIL
 from PIL import Image, ExifTags
+from datetime import datetime
 from functools import cache
 from enum import Enum, auto
 from pathlib import Path
 from hashlib import md5
+from typing import Any
 
 
 class EntryType(Enum):
@@ -69,7 +73,7 @@ class Entry:
             return hash(md5_hasher.hexdigest())
 
     @property
-    def m_type(self) -> EntryType:
+    def entry_type(self) -> EntryType:
         """
         Returns the entry type enum of the given file if it is recognized, else Unknown.
         :return: The EntryType of the given path.
@@ -84,13 +88,13 @@ class Entry:
         """
         return getsize(self.path)
 
-    def __equal__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """
         Returns whether the file's contents is equal to the other file's contents.
         :param other: The other file.
         :return: bool True if the contents are equal.
         """
-        return self.__hash__() == other.__hash__()
+        return isinstance(other, Entry) and hash(self) == hash(other)
 
     def __lt__(self, other) -> bool:
         """
@@ -98,7 +102,7 @@ class Entry:
         :param other:
         :return:
         """
-        return getsize(self.path) < getsize(other)
+        return getsize(self.path) < getsize(other.path)
 
     @property
     def created(self):
@@ -106,23 +110,28 @@ class Entry:
         Returns the creation date of the file (other the taken date in the item is an image and has an entry for this).
         :return:
         """
-        if not self.m_type == EntryType.IMAGE:
-            return getctime(self.path)
+        if not self.entry_type == EntryType.IMAGE:
+            time_stamp: float = getctime(self.path)
         else:  # File is an image, look for the date it was taken.
-            date_taken: float = self.exif.get('DateTimeOriginal')
-            return date_taken if date_taken else getctime(self.path)
+            date_taken: str | None = self.exif.get('DateTimeOriginal')
+            time_stamp: float = float(date_taken) if date_taken else getctime(self.path)
+
+        return datetime.fromtimestamp(time_stamp)
 
     @property
-    def exif(self) -> dict | None:
+    def exif(self) -> dict[str, str] | None:
         """
         Returns the exif data for the entry if it's an image and has exif data. Else returns None.
         :return: The exif data for the image else None.s
         """
-        if not self.m_type == EntryType.IMAGE:
+        if not self.entry_type == EntryType.IMAGE:
             return None
         else:
-            img = Image.open(self.path)
-            return {ExifTags.TAGS[k]: v for k, v in img.getexif().items()}
+            try:
+                with Image.open(self.path) as img:
+                    return {ExifTags.TAGS[k]: v for k, v in img.getexif().items()}
+            except PIL.UnidentifiedImageError:
+                return None
 
     @staticmethod
     @cache
