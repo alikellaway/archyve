@@ -4,7 +4,7 @@ Module contains a unit test for the entry module.
 Author: ali.kellaway139@gmail.com
 """
 from src.test.run_unit_tests import TEST_MATERIALS
-from src.toolkit.entry import EntryType, Entry
+from src.entry import EntryType, Entry
 from unittest import TestCase, main
 from datetime import datetime
 from pathlib import Path
