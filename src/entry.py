@@ -1,5 +1,7 @@
 """
-Module contains logic to represent different kinds of entries in an archive.
+Module contains classes to represent different kinds of files in an archive.
+
+NB: Each file in an archive is an Entry.
 
 Author: ali.kellaway139@gmail.com
 """
@@ -15,7 +17,7 @@ from hashlib import md5
 
 class EntryType(Enum):
     """
-    An enumerator to represent different types of archive Entries.
+    An enumerator to represent different types of files within an archive. Each file in an archive is an Entry.
     """
     IMAGE = auto()
     AUDIO = auto()
@@ -29,7 +31,7 @@ class Entry:
     Class is used to represent and assist in the management of files in an archive.
     """
 
-    # Extension map is a map mapping of file extensions to the entry type it pertains to
+    # Mapping of file extensions to EntryType
     EXTENSION_MAP: dict[str, EntryType] = {
         ".bmp": EntryType.IMAGE, ".cod": EntryType.IMAGE, ".gif": EntryType.IMAGE, ".ico": EntryType.IMAGE,
         ".ief": EntryType.IMAGE, ".jpe": EntryType.IMAGE, ".jpeg": EntryType.IMAGE, ".jpg": EntryType.IMAGE,
@@ -52,23 +54,34 @@ class Entry:
         ".wpd": EntryType.TEXT, ".wps": EntryType.TEXT, ".xml": EntryType.TEXT, ".xps": EntryType.TEXT
     }
 
-    def __init__(self, path: Path | str):
+    def __init__(self, path: Union[Path, str, 'Entry']):
         """
         Create a new instance of the class.
-        :param path: The path file represent.
+        :param path: The path of the file to represent.
         """
-        self.path: Path = Path(path)
+        # Use our parameters to create the object.
+        if isinstance(path, Path | str):
+            self.path: Path = Path(path)
+
+        # If we got an Entry object as input
+        elif isinstance(path, Entry):
+            for attribute, value in path.__dict__.items():
+                setattr(self, attribute, value)
+
+        # We don't know what to do with this input type
+        else:
+            raise NotImplementedError(f'Constructor for entry with input \"{path}\" not implemented.')
 
     def __hash__(self) -> int:
         """
         Returns the hash of the underlying file given its path.
         :return: A string hash of the file at the path.
         """
-        md5_hasher = md5()
+        md5_hash = md5()
         with open(Path(self.path).resolve(), 'rb') as f:
             buf = f.read()
-            md5_hasher.update(buf)
-            return hash(md5_hasher.hexdigest())
+            md5_hash.update(buf)
+            return hash(md5_hash.hexdigest())
 
     @property
     def entry_type(self) -> EntryType:
@@ -94,19 +107,20 @@ class Entry:
         """
         return isinstance(other, Entry) and hash(self) == hash(other)
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Any) -> bool:
         """
-        Allows sorting of Entry objects by size.
-        :param other:
+        Allows sorting of Entry objects by file size.
+        :param other: The other item to compare size with
         :return:
         """
+        if not isinstance(other, Entry):
+            raise NotImplementedError(f'Size comparison between Entry and \"{type(other)}\" is not implemented.')
         return getsize(self.path) < getsize(other.path)
 
     @property
-    def created(self):
+    def created(self) -> datetime:
         """
-        Returns the creation date of the file (other the taken date in the item is an image and has an entry for this).
-        :return:
+        :return: The creation date of the file (other the taken date in the item is an image and has an entry for this).
         """
         if not self.entry_type == EntryType.IMAGE:
             time_stamp: float = getctime(self.path)
@@ -120,8 +134,7 @@ class Entry:
     @property
     def exif(self) -> dict[str, str] | None:
         """
-        Returns the exif data for the entry if it's an image and has exif data. Else returns None.
-        :return: The exif data for the image else None.s
+        :return: the exif data for the entry if it's an image and has exif data. Else returns None.
         """
         if not self.entry_type == EntryType.IMAGE:
             return None
@@ -135,9 +148,23 @@ class Entry:
     @staticmethod
     @cache
     def __suffix_set():
+        """
+        :return: A set of all the suffixes known.
+        """
         return set(Entry.EXTENSION_MAP.keys())
 
     def __repr__(self):
-        return str(self.entry_type.name) + ' | ' + str(self.path)
+        """
+        :return: A string representation of the entry (its path).
+        """
+        return str(self.path)
 
-
+    def delete(self) -> Exception | None:
+        """
+        Deletes the entry (actually deletes the underlying file; be careful).
+        :return: boolean describing whether the deletion was successful (true if delete successful).
+        """
+        try:
+            self.path.unlink()
+        except Exception as e:
+            return e
