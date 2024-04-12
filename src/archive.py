@@ -1,5 +1,5 @@
 """
-This module contains functions useful for managing a archive of files. Whether that be checking equality, removing,
+This module contains functions useful for managing an archive of files. Whether that be checking equality, removing,
 hashing or finding duplicates.
 
 Author: ali.kellaway139@gmail.com
@@ -13,13 +13,25 @@ from pathlib import Path
 class Archive:
 
     def __init__(self, *directory: Path | str):
-        self.path: list[Path | str] = list(directory)
+        """
+        Initializes a new Archive object.
+        :param directory: The directory(s) that you want to many with this archive object.
+        """
+        # Ensure all the given locations are directories and exist.
+        for d in directory:
+            if not d.is_dir():
+                raise ValueError('Archive can only accept directories in its constructor.')
+            if not d.exists():
+                raise FileNotFoundError(f'Non-existent directory: {str(d)}')
+
+        # Store the paths that will be managed by this archive.
+        self.paths: list[Path | str] = list(directory)
 
     def entry_file_paths(self) -> Generator[Path, None, None]:
         """
-        :return: Generator containing all files (regardless of depth) within all the paths within self.path.
+        :return: Generator containing all files (regardless of depth) within all the folders within self.path.
         """
-        return (sp for path in self.path for sp in sub_paths(path))
+        return (sp for path in self.paths for sp in sub_paths(path))
 
     @property
     def entries(self) -> Generator[Entry, None, None]:
