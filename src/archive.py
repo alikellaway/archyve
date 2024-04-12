@@ -5,8 +5,8 @@ hashing or finding duplicates.
 Author: ali.kellaway139@gmail.com
 """
 from src.file_structure_functions import sub_paths
-from typing import Generator, Iterable
-from entry import Entry, EntryType
+from typing import Generator, Iterable, Callable
+from src.entry import Entry, EntryType
 from pathlib import Path
 
 
@@ -17,15 +17,14 @@ class Archive:
         Initializes a new Archive object.
         :param directory: The directory(s) that you want to many with this archive object.
         """
+        # Store the paths that will be managed by this archive.
+        self.paths: list[Path | str] = [Path(d) for d in directory]
         # Ensure all the given locations are directories and exist.
-        for d in directory:
+        for d in self.paths:
             if not d.is_dir():
                 raise ValueError('Archive can only accept directories in its constructor.')
             if not d.exists():
                 raise FileNotFoundError(f'Non-existent directory: {str(d)}')
-
-        # Store the paths that will be managed by this archive.
-        self.paths: list[Path | str] = list(directory)
 
     def entry_file_paths(self) -> Generator[Path, None, None]:
         """
@@ -139,3 +138,12 @@ class Archive:
         :return: A generator of all the unknown entries in the Archive.
         """
         return Archive.__filter_entries(EntryType.UNKNOWN, self.entries)
+
+    def search(self, *string: str, any_all: Callable = any) -> Generator[Entry, None, None]:
+        """
+        Returns entries in the archive whose paths contain any or all of the search strings.
+        :param string: The string(s) that a path needs to contain to be 'found' as part of the search.
+        :param any_all: Whether the path should contain all or any of the given strings.
+        :return: A generator yielding paths that came up in the search.
+        """
+        return (e for e in self.entries if any_all(v in str(e.path) for v in string))

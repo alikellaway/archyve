@@ -169,3 +169,17 @@ class Entry:
             self.path.unlink()
         except Exception as e:
             return e
+
+    def rename(self, new_file_name: str) -> None:
+        """
+        Renames the entry.
+        :param new_file_name: The new name to give the entry.
+        """
+        self.path.rename(self.path.parent / new_file_name)
+
+    def move(self, new_path: Path | str) -> None:
+        """
+        Moves the entry to a new path.
+        :param new_path: The new path the entry will have.
+        """
+        self.path.rename(new_path)
