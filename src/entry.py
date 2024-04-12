@@ -38,20 +38,21 @@ class Entry:
         ".pbm": EntryType.IMAGE, ".pgm": EntryType.IMAGE, ".png": EntryType.IMAGE, ".pnm": EntryType.IMAGE,
         ".ppm": EntryType.IMAGE, ".ras": EntryType.IMAGE, ".rgb": EntryType.IMAGE, ".svg": EntryType.IMAGE,
         ".tif": EntryType.IMAGE, ".tiff": EntryType.IMAGE, ".xbm": EntryType.IMAGE, ".xpm": EntryType.IMAGE,
-        ".xwd": EntryType.IMAGE,
+        ".xwd": EntryType.IMAGE,  # Add any extra image extensions here
 
         ".3g2": EntryType.VIDEO, ".3gp": EntryType.VIDEO, ".avi": EntryType.VIDEO, ".flv": EntryType.VIDEO,
         ".h264": EntryType.VIDEO, ".m4v": EntryType.VIDEO, ".mkv": EntryType.VIDEO, ".mov": EntryType.VIDEO,
         ".mp4": EntryType.VIDEO, ".mpeg": EntryType.VIDEO, ".mpg": EntryType.VIDEO, ".rm": EntryType.VIDEO,
-        ".swf": EntryType.VIDEO, ".vob": EntryType.VIDEO, ".wmv": EntryType.VIDEO,
+        ".swf": EntryType.VIDEO, ".vob": EntryType.VIDEO, ".wmv": EntryType.VIDEO,  # Add video extensions here
 
         ".aif": EntryType.AUDIO, ".aifc": EntryType.AUDIO, ".aiff": EntryType.AUDIO, ".au": EntryType.AUDIO,
         ".flac": EntryType.AUDIO, ".m4a": EntryType.AUDIO, ".mp3": EntryType.AUDIO, ".ogg": EntryType.AUDIO,
-        ".ra": EntryType.AUDIO, ".wav": EntryType.AUDIO, ".wma": EntryType.AUDIO,
+        ".ra": EntryType.AUDIO, ".wav": EntryType.AUDIO, ".wma": EntryType.AUDIO,  # Add audio extensions here
 
         ".doc": EntryType.TEXT, ".docx": EntryType.TEXT, ".htm": EntryType.TEXT, ".html": EntryType.TEXT,
         ".odt": EntryType.TEXT, ".pdf": EntryType.TEXT, ".rtf": EntryType.TEXT, ".txt": EntryType.TEXT,
         ".wpd": EntryType.TEXT, ".wps": EntryType.TEXT, ".xml": EntryType.TEXT, ".xps": EntryType.TEXT
+        # Add any extra text extensions here
     }
 
     def __init__(self, path: Union[Path, str, 'Entry']):
