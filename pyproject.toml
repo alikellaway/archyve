@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "archyve"
-version = "0.2.2"
+version = "0.2.3"
 description = "Python toolkit for the mass management and analysis of files."
 authors = ["Alistair Kellaway <ali.kellaway139@gmail.com>"]
 readme = "README.md"
