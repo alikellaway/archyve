@@ -1,9 +1,9 @@
 """
-Module contains a unit test for the entry module.
+Module contains a unit tests for the entry module.
 
 Author: ali.kellaway139@gmail.com
 """
-from test.run_unit_tests import TEST_MATERIALS
+from tests.run_unit_tests import TEST_MATERIALS
 from entry import EntryType, Entry
 from unittest import TestCase, main
 from datetime import datetime
@@ -49,7 +49,7 @@ class TestMediaTypes(TestCase):
         self.assertFalse(Entry(ENTRY_TEST_MATS / 'image.jpg') < Entry(ENTRY_TEST_MATS / 'image.jpg'))
         self.assertFalse(Entry(ENTRY_TEST_MATS / 'black_square.jpg') < Entry(ENTRY_TEST_MATS / 'image.jpg'))
 
-    # TODO come up with a better way to test created (as it will not work when cloned).
+    # TODO come up with a better way to tests created (as it will not work when cloned).
     # def test_created(self):
     #     """
     #     Test the created property is working as intended.

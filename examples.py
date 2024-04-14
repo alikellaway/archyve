@@ -2,10 +2,10 @@ from archyve import Archyve
 from typing import Final
 from pathlib import Path
 from entry import Entry
-import test
+import tests
 
 
-TEST_DIR: Final[Path] = Path(test.__file__).parent
+TEST_DIR: Final[Path] = Path(tests.__file__).parent
 
 
 def entries_to_str(entry_matrix: list[list[Entry]]) -> list[list[str]]:
@@ -48,18 +48,18 @@ if __name__ == '__main__':
         print('-' * 100)
 
     breaker()
-    print("The following are duplicate files from the unit test folder:".upper())
+    print("The following are duplicate files from the unit tests folder:".upper())
     print("\n".join(
         str(entry_list) for entry_list in entries_to_str(identify_duplicate_files(TEST_DIR)))
     )
 
     breaker()
-    print("The following are duplicate images from the unit test folder:".upper())
+    print("The following are duplicate images from the unit tests folder:".upper())
     print("\n".join(
         str(entry_list) for entry_list in entries_to_str(identify_duplicate_images(TEST_DIR)))
     )
 
     breaker()
-    print("The following are all the files in the test folder with 'black' in the file name:".upper())
+    print("The following are all the files in the tests folder with 'black' in the file name:".upper())
     print("\n".join(str(p) for p in identify_entries_with_custom_filter(TEST_DIR)))
 

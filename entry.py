@@ -194,5 +194,5 @@ class Entry:
 
 if __name__ == '__main__':
     import src
-    image: Entry = Entry(Path(src.__file__).parent / 'test' / 'images' / 'black_square_with_one_line.jpg')
+    image: Entry = Entry(Path(src.__file__).parent / 'tests' / 'images' / 'black_square_with_one_line.jpg')
     pass
