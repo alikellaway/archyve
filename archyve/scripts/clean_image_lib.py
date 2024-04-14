@@ -5,7 +5,7 @@ into albums.
 
 Author: ali.kellaway139@gmail.com
 """
-from archyve import Archyve
+from archyve.archyve import Archyve
 from archyve.entry import Entry
 
 

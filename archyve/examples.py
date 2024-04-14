@@ -1,4 +1,4 @@
-from archyve import Archyve
+from archyve.archyve import Archyve
 from typing import Final
 from pathlib import Path
 from entry import Entry
