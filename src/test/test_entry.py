@@ -49,15 +49,16 @@ class TestMediaTypes(TestCase):
         self.assertFalse(Entry(ENTRY_TEST_MATS / 'image.jpg') < Entry(ENTRY_TEST_MATS / 'image.jpg'))
         self.assertFalse(Entry(ENTRY_TEST_MATS / 'black_square.jpg') < Entry(ENTRY_TEST_MATS / 'image.jpg'))
 
-    def test_created(self):
-        """
-        Test the created property is working as intended.
-        :return:
-        """
-        self.assertEqual(Entry(ENTRY_TEST_MATS / 'black_square.jpg').created,
-                         datetime.strptime('2024-04-08 20:34:01.332365', '%Y-%m-%d %H:%M:%S.%f'))
-        self.assertEqual(Entry(ENTRY_TEST_MATS / 'video.mpeg').created,
-                         datetime.strptime('2024-04-07 19:14:09.961920', "%Y-%m-%d %H:%M:%S.%f"))
+    # TODO come up with a better way to test created (as it will not work when cloned).
+    # def test_created(self):
+    #     """
+    #     Test the created property is working as intended.
+    #     :return:
+    #     """
+    #     self.assertEqual(Entry(ENTRY_TEST_MATS / 'black_square.jpg').created,
+    #                      datetime.strptime('2024-04-08 20:34:01.332365', '%Y-%m-%d %H:%M:%S.%f'))
+    #     self.assertEqual(Entry(ENTRY_TEST_MATS / 'video.mpeg').created,
+    #                      datetime.strptime('2024-04-07 19:14:09.961920', "%Y-%m-%d %H:%M:%S.%f"))
 
     def test_exif(self):
         """
