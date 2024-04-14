@@ -4,16 +4,23 @@ hashing or finding duplicates.
 
 Author: ali.kellaway139@gmail.com
 """
-from abc import ABC, abstractmethod
-from types import TracebackType
-
 from src.file_structure_functions import sub_paths
 from typing import Generator, Iterable, Callable
 from src.entry import Entry, EntryType
+from itertools import chain
 from pathlib import Path
 
 
 class Archyve:
+    """
+    Archyve can be used to manage large file stores. It has features specifically for media, but works on any kind of
+    file. It can identify duplicates, remove, move, sort and manage files en masse. Looping through the archyve will
+    cause the underlying generator to be exhausted - this will result in anomalies like the length being 0. To reset
+    archyve to its original state you can use the reset method, however, this will remove all filters. It is therefore
+    best practice to do all the set-up before iterating over the archyve.
+
+    NB: If you run into recursion errors you may need to use sys.setrecursionlimit()
+    """
 
     def __init__(self, *directory: Path | str):
         """
@@ -60,7 +67,7 @@ class Archyve:
         """
         self._entries = new_generator
 
-    def duplicates(self, paths: Iterable[Path | Entry | str] | None = None,) -> list[list[Entry]]:
+    def duplicates(self) -> list[list[Entry]]:
         """
         Returns a list of the paths of files that share the same md5 hash.
         :param paths: An iterable of paths in which to search for duplicates; defaults to all paths managed by the
@@ -68,9 +75,8 @@ class Archyve:
         :return: A dictionary mapping hashes to paths found in any of the parent directories or subdirectories that have
                  that hash.
         """
-        search_space: Generator[Entry, None, None] = Archyve.create_entries(paths) if paths else self.entries
         hashes_to_entries: dict[int, list[Entry]] = {}
-        for entry in search_space:
+        for entry in self.entries:
             f_hash: int = hash(entry)
             duplicates: list[Path] | None = hashes_to_entries.get(f_hash)
             if duplicates:
@@ -185,3 +191,33 @@ class Archyve:
             new_archyve: Archyve = Archyve(*self.paths)
             new_archyve.entries = filtered
             return new_archyve
+
+    def __add__(self, other: 'Archyve') -> 'Archyve':
+        """
+        Adds two archyves together.
+        :param other: Another archyve object to add to this one.
+        :return: The new archyve object.
+        """
+        if isinstance(other, Archyve):
+            new_archyve: Archyve = Archyve(*list(set(self.paths + other.paths)))
+            new_archyve.entries = (e for e in chain(self.entries, other.entries))
+            return new_archyve
+        else:
+            raise NotImplementedError(f'Addition of \'Archyve\' and {type(other)} not implemented.')
+
+    def __iter__(self):
+        return iter(list(self.entries))
+
+    def __next__(self):
+        return self.entries.__next__()
+
+    def reset(self):
+        """
+        Puts the archyve back into its original state, so that it can be iterated over once again. This will also
+        remove any filters placed on the archyve.
+        :return: None
+        """
+        self._entries = None
+
+    def __len__(self):
+        return len(list(self.entries))

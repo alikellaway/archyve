@@ -15,6 +15,7 @@ if __name__ == '__main__':
     archyve: Archyve = Archyve(r"<put your path here>")
 
     # Get a list of all the duplicate images and videos
+    archyve = archyve.images + archyve.videos
     duplicate_lists: list[list[Entry]] = archyve.images.duplicates()
 
     # Sort the duplicates by age
@@ -22,6 +23,7 @@ if __name__ == '__main__':
         duplicate_lists[i] = sorted(duplicate_lists[i], key=lambda e: e.created)
 
     # Delete the ones that are not the oldest
-    delete: list[list[Entry]] = [el[1:] for el in duplicate_lists]
+    delete: list[list[Entry]] = [duplicate_list[1:] for duplicate_list in duplicate_lists]
     for entry_list in delete:
         archyve.delete(entry_list)
+
