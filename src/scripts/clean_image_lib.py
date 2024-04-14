@@ -6,11 +6,13 @@ into albums.
 Author: ali.kellaway139@gmail.com
 """
 from src.archyve import Archyve
-from src.entry import Entry, EntryType
+from src.entry import Entry
 
 
 if __name__ == '__main__':
-    archyve: Archyve = Archyve(r"D:\Pictures\Out Of Albums\Unsortables")
+    # NB DO NOT RUN THIS IF YOU DON'T UNDERSTAND IT.
+
+    archyve: Archyve = Archyve(r"<put your path here>")
 
     # Get a list of all the duplicate images and videos
     duplicate_lists: list[list[Entry]] = archyve.images.duplicates()
@@ -19,4 +21,7 @@ if __name__ == '__main__':
     for i in range(len(duplicate_lists)):
         duplicate_lists[i] = sorted(duplicate_lists[i], key=lambda e: e.created)
 
-
+    # Delete the ones that are not the oldest
+    delete: list[list[Entry]] = [el[1:] for el in duplicate_lists]
+    for entry_list in delete:
+        archyve.delete(entry_list)

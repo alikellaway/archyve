@@ -81,7 +81,7 @@ class Archyve:
         return [entries for entries in hashes_to_entries.values() if len(entries) > 1]
 
     @staticmethod
-    def remove(*path: Path | str | Entry | Iterable[Path | str | Entry]) -> dict[Path, Exception] | None:
+    def delete(*path: Path | str | Entry | Iterable[Path | str | Entry]) -> dict[Path, Exception] | None:
         """
         Removes files given their paths.
         :param path: The path or list of paths to remove.
@@ -170,11 +170,18 @@ class Archyve:
         """
         return (e for e in self.entries if any_all(v in str(e.path) for v in string))
 
-    def filter(self, func: Callable) -> 'Archyve':
+    def filter(self, func: Callable, inplace: bool = True) -> 'Archyve':
         """
         Returns the archyve filtered on your given function.
         :param func: The function to filter the archyve on (must return bool) (Trues are allowed through).
+        :param inplace: Whether to return a new archyve or to return this one with the entries filtered.
         :return: This archyve but filtered on the given function.
         """
-        self.entries = (e for e in filter(func, self.entries))
-        return self
+        filtered: Generator[Path, None, None] = (e for e in filter(func, self.entries))
+        if inplace:
+            self.entries = filtered
+            return self
+        else:
+            new_archyve: Archyve = Archyve(*self.paths)
+            new_archyve.entries = filtered
+            return new_archyve
