@@ -5,8 +5,8 @@ into albums.
 
 Author: ali.kellaway139@gmail.com
 """
-from src.archyve import Archyve
-from src.entry import Entry
+from archyve import Archyve
+from entry import Entry
 
 
 if __name__ == '__main__':
