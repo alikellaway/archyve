@@ -6,7 +6,7 @@ into albums.
 Author: ali.kellaway139@gmail.com
 """
 from archyve import Archyve
-from entry import Entry
+from archyve.entry import Entry
 
 
 if __name__ == '__main__':

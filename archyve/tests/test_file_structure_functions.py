@@ -1,5 +1,5 @@
-from file_structure_functions import sub_files, sub_dirs, sub_paths
-from tests.run_unit_tests import TEST_MATERIALS
+from archyve.file_structure_functions import sub_files, sub_dirs, sub_paths
+from archyve.tests.run_unit_tests import TEST_MATERIALS
 from pathlib import Path
 from typing import Final
 import unittest

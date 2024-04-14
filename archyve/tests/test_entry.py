@@ -3,10 +3,9 @@ Module contains a unit tests for the entry module.
 
 Author: ali.kellaway139@gmail.com
 """
-from tests.run_unit_tests import TEST_MATERIALS
-from entry import EntryType, Entry
+from archyve.tests.run_unit_tests import TEST_MATERIALS
+from archyve.entry import EntryType, Entry
 from unittest import TestCase, main
-from datetime import datetime
 from pathlib import Path
 from typing import Final
 
