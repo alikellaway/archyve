@@ -2,7 +2,7 @@ from archyve import Archyve
 from typing import Final
 from pathlib import Path
 from entry import Entry
-import src.test as test
+import test
 
 
 TEST_DIR: Final[Path] = Path(test.__file__).parent

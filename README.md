@@ -12,27 +12,10 @@ provides the necessary functionalities to streamline your file management tasks.
 - **Removal Tools:** Safely remove unwanted files from your archives.
 
 ## Installation
-
-To use the Mass File Manager, follow these steps:
-
-1. Clone this repository to your local machine:
-
-   ```bash
-   git clone https://github.com/your-username/mass-file-manager.git
-2. Create a virtual environment for your project (if you don't already have one):
-   ```bash
-   py -m venv venv/
-3. Activate your virtual environment:
-   ```bash
-   cd venv/Scripts
-   ```
-   ```bash
-   .\activate
-
-4. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-
+```bash
+pip install archyve
+```
+   
 
 ## Examples
 
@@ -41,6 +24,34 @@ Below are some examples of how to use archyve.
 1. Find duplicates in a large library of images:
    
    ```python
-   import archyve
+   from archyve import Archyve, Entry
    
+   # Create an archyve
+   archyve: Archyve = Archyve(r"<put your path(s) here>")
+
+   # Get a list of all the duplicate images and videos
+   archyve = archyve.images + archyve.videos
+   duplicate_lists: list[list[Entry]] = archyve.duplicates()
+   
+   # Sort the duplicates by age
+   for i in range(len(duplicate_lists)):
+       duplicate_lists[i] = sorted(duplicate_lists[i], key=lambda e: e.created)
+   
+   # Delete the ones that are not the oldest
+   delete: list[list[Entry]] = [duplicate_list[1:] for duplicate_list in duplicate_lists]
+   for entry_list in delete:
+       archyve.delete(entry_list)
+   ```
+
+2. Get a list of all non-text files recursively in a given directory:
+   
+   ```python
+   from archyve import Archyve, EntryType
+   
+   # Create an archyve
+   archyve: Archyve = Archyve(r"p1", r"p2")
+   # Filter the archyve entries on whatever you need
+   archyve = archyve.filter(lambda e: not e.is_type(EntryType.TEXT))
+   for entry in archyve:
+      print(entry)
    ```
