@@ -4,9 +4,9 @@ hashing or finding duplicates.
 
 Author: ali.kellaway139@gmail.com
 """
-from file_structure_functions import sub_paths
+from .file_structure_functions import sub_paths
 from typing import Generator, Iterable, Callable
-from entry import Entry, EntryType
+from .entry import Entry, EntryType
 from itertools import chain
 from pathlib import Path
 

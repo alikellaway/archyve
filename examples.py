@@ -1,7 +1,7 @@
-from archyve import Archyve
+from .archyve import Archyve
 from typing import Final
 from pathlib import Path
-from entry import Entry
+from .entry import Entry
 import test
 
 
