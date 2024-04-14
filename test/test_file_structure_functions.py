@@ -1,5 +1,5 @@
-from src.file_structure_functions import sub_files, sub_dirs, sub_paths
-from src.test.run_unit_tests import TEST_MATERIALS
+from file_structure_functions import sub_files, sub_dirs, sub_paths
+from test.run_unit_tests import TEST_MATERIALS
 from pathlib import Path
 from typing import Final
 import unittest
