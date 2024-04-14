@@ -4,6 +4,10 @@ Archive Manager is a Python tool designed to help users interact with and manage
 Whether you need to sort files, find duplicates, perform equality checks, or remove unnecessary files, this tool 
 provides the necessary functionalities to streamline your file management tasks.
 
+Core concepts and explanation:
+- Archyves are wrappers for built in generators that enable the user to loop through directories revursively.
+- To represent each item that the archyve finds, we have Entry objects - these are wrappers for Path objects that enable some useful features like hashing, sorting etc.
+
 ## Features
 
 - **Sorting:** Organize your files based on various criteria such as file type, size, date modified, etc.
@@ -50,8 +54,11 @@ Below are some examples of how to use archyve.
    
    # Create an archyve
    archyve: Archyve = Archyve(r"p1", r"p2")
+   
    # Filter the archyve entries on whatever you need
    archyve = archyve.filter(lambda e: not e.is_type(EntryType.TEXT))
+   
+   # Loop through the archyve and print the entries
    for entry in archyve:
       print(entry)
    ```
