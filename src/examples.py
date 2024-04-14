@@ -1,4 +1,4 @@
-from archive import Archive
+from archyve import Archyve
 from typing import Final
 from pathlib import Path
 from entry import Entry
@@ -23,7 +23,7 @@ def identify_duplicate_files(directory: Path | str) -> list[list[Entry]]:
     :param directory: The parent directory to search for duplicates in
     :return: A list of lists containing files that have the same contents.
     """
-    archive: Archive = Archive(directory)
+    archive: Archyve = Archyve(directory)
     return archive.duplicates()
 
 
@@ -33,14 +33,14 @@ def identify_duplicate_images(directory: Path | str) -> list[list[Entry]]:
     :param directory: The directory in which to find duplicate images.
     :return: A list of lists of paths to files that have the same contents.
     """
-    archive: Archive = Archive(directory)  # Create an archive in the area you want
-    return archive.duplicates(archive.images)  # Get duplicate images from the archive
+    archive: Archyve = Archyve(directory)  # Create an archive in the area you want
+    return archive.images.duplicates()  # Get duplicate images from the archive
 
 
 def identify_entries_with_custom_filter(directory: Path | str) -> list[Entry]:
-    archive: Archive = Archive(directory)
-    entries_with_black_in_the_name = [entry for entry in archive.entries if 'black' in entry.path.name.casefold()]
-    return entries_with_black_in_the_name
+    archyve: Archyve = Archyve(directory)
+    archyve: Archyve = archyve.filter(lambda e: 'black' in e.path.name.casefold())
+    return list(archyve.entries)
 
 
 if __name__ == '__main__':

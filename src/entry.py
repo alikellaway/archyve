@@ -10,25 +10,25 @@ from os.path import getsize, getctime
 from datetime import datetime
 from typing import Any, Union
 from functools import cache
-from enum import Enum, auto
 from pathlib import Path
 from hashlib import md5
+from enum import Enum
 
 
 class EntryType(Enum):
     """
-    An enumerator to represent different types of files within an archive. Each file in an archive is an Entry.
+    An enumerator to represent different types of files within an archyve. Each file in an archyve is an Entry.
     """
-    IMAGE = auto()
-    AUDIO = auto()
-    VIDEO = auto()
-    TEXT = auto()
-    UNKNOWN = auto()
+    IMAGE = 'image'
+    AUDIO = 'audio'
+    VIDEO = 'video'
+    TEXT = 'text'
+    UNKNOWN = 'unknown'
 
 
 class Entry:
     """
-    Class is used to represent and assist in the management of files in an archive.
+    Class is used to represent and assist in the management of files in an archyve.
     """
 
     # Mapping of file extensions to EntryType
@@ -183,3 +183,16 @@ class Entry:
         :param new_path: The new path the entry will have.
         """
         self.path.rename(new_path)
+
+    def is_type(self, e_type: EntryType) -> bool:
+        """
+        :param e_type: The entry type to check equality for.
+        :return: Whether this entry is of the parameter type.
+        """
+        return self.entry_type == e_type
+
+
+if __name__ == '__main__':
+    import src
+    image: Entry = Entry(Path(src.__file__).parent / 'test' / 'images' / 'black_square_with_one_line.jpg')
+    pass
