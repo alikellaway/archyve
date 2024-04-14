@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "archyve"
+version = "0.1.0"
+description = "Python toolkit for the mass management and analysis of files."
+authors = ["Alistair Kellaway <ali.kellaway139@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pillow = "^10.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

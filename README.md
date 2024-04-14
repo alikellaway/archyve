@@ -32,3 +32,15 @@ To use the Mass File Manager, follow these steps:
 4. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
+
+
+## Examples
+
+Below are some examples of how to use archyve.
+
+1. Find duplicates in a large library of images:
+   
+   ```python
+   import archyve
+   
+   ```
